@@ -57,6 +57,7 @@ public boolean Scan(String line){
     // we need to consider '\n' character when we use scanner
     // until we meet the symbol ';', we need to think all of the token on one line and on circumstance
     // token can be splited by sub token
+    // we need to consider annotation
     System.out.println("Scan(line:String):boolean");
     int sizeOfLine = line.length();
     int startIdx = 0;
@@ -111,18 +112,19 @@ public int nextState(char ch, int curState){
         switch (curState) { // Need to reduce redundancy
             case 0: if(isLetter(ch)) nextState = 1;
                     else if(ch == ' ') nextState = DELIMITER;
-                    else if(ch == ';' || ch == ',') nextState = 5;
+                    else if(ch == ';' || ch == ':' || ch == ',') nextState = 5;
                     else if(ch == '=' || ch == '>' ||
                             ch == '<' || ch == '*' ||
                             ch == '/' || ch == '%') nextState = 2;
                     else if(isDigit(ch)) nextState = 4;
                     else if(ch == '(') nextState = 7;
+                    else if(ch == '\"') nextState = 9;
                     else if(ch == '+' || ch == '-') nextState = 8;
                     else nextState = ERROR;
                     break;
             case 1: if(isLetter(ch) || isDigit(ch)) nextState = 1;
                     else if(ch == '.') nextState = 6;
-                    else if(ch == ' ' || ch == ';' ||
+                    else if(ch == ' ' || ch == ';' || ch == ':' ||
                             ch == ',' || ch == '=' ||
                             ch == '>' || ch == '<' ||
                             ch == '+' || ch == '-' ||
@@ -138,7 +140,7 @@ public int nextState(char ch, int curState){
                     else nextState = ERROR;
                     break;
             case 4: if(isDigit(ch)) nextState = 4;
-                    else if(ch == ' ' || ch == ';' ||
+                    else if(ch == ' ' || ch == ';' || ch == ':' ||
                             ch == ',' || ch == '=' ||
                             ch == '>' || ch == '<' ||
                             ch == '+' || ch == '-' ||
@@ -157,6 +159,9 @@ public int nextState(char ch, int curState){
             case 8: if(ch == '=' || ch == '+' || ch == '-') nextState = 3;
                     else if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMITER;
                     else nextState = ERROR;
+                    break;
+            case 9: if(ch == '\"') nextState = 5;
+                    else nextState = 9;
                     break;
             default: nextState = ERROR;
         }
