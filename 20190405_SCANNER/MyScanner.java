@@ -108,13 +108,16 @@ public int nextState(char ch, int curState){
     System.out.println("nextState(ch:char, curState:int):int");
     int nextState = 0;
     try {
-        switch (curState) {
+        switch (curState) { // Need to reduce redundancy
             case 0: if(isLetter(ch)) nextState = 1;
                     else if(ch == ' ') nextState = DELIMITER;
                     else if(ch == ';' || ch == ',') nextState = 5;
-                    else if(ch == '=' || ch == '>' || ch == '<') nextState = 2;
+                    else if(ch == '=' || ch == '>' ||
+                            ch == '<' || ch == '*' ||
+                            ch == '/' || ch == '%') nextState = 2;
                     else if(isDigit(ch)) nextState = 4;
                     else if(ch == '(') nextState = 7;
+                    else if(ch == '+' || ch == '-') nextState = 8;
                     else nextState = ERROR;
                     break;
             case 1: if(isLetter(ch) || isDigit(ch)) nextState = 1;
@@ -122,7 +125,9 @@ public int nextState(char ch, int curState){
                     else if(ch == ' ' || ch == ';' ||
                             ch == ',' || ch == '=' ||
                             ch == '>' || ch == '<' ||
-                            ch == '(') nextState = DELIMITER;
+                            ch == '+' || ch == '-' ||
+                            ch == '*' || ch == '/' ||
+                            ch == '%' || ch == '(') nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
             case 2: if(ch == '=') nextState = 3;
@@ -135,7 +140,10 @@ public int nextState(char ch, int curState){
             case 4: if(isDigit(ch)) nextState = 4;
                     else if(ch == ' ' || ch == ';' ||
                             ch == ',' || ch == '=' ||
-                            ch == '>' || ch == '<') nextState = DELIMITER;
+                            ch == '>' || ch == '<' ||
+                            ch == '+' || ch == '-' ||
+                            ch == '*' || ch == '/' ||
+                            ch == '%') nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
             case 5: nextState = DELIMITER;
@@ -145,6 +153,10 @@ public int nextState(char ch, int curState){
                     break;
             case 7: if(ch == ')') nextState = 5;
                     else nextState = 7;
+                    break;
+            case 8: if(ch == '=' || ch == '+' || ch == '-') nextState = 3;
+                    else if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMITER;
+                    else nextState = ERROR;
                     break;
             default: nextState = ERROR;
         }
