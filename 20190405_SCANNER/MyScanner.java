@@ -58,6 +58,8 @@ public boolean Scan(String line){
     // until we meet the symbol ';', we need to think all of the token on one line and on circumstance
     // token can be splited by sub token
     // we need to consider annotation
+    // we need to consider whether the parenthesis is behind the function identifier or not
+    // If the parenthesis is behind the reserved id like while, for, if, we need to analyze the sentence between the parenthesis
     System.out.println("Scan(line:String):boolean");
     int sizeOfLine = line.length();
     int startIdx = 0;
@@ -156,7 +158,8 @@ public int nextState(char ch, int curState){
             case 7: if(ch == ')') nextState = 5;
                     else nextState = 7;
                     break;
-            case 8: if(ch == '=' || ch == '+' || ch == '-') nextState = 3;
+            case 8: if(ch == '=') nextState = 3;
+                    if(ch == '+' || ch == '-') nextState = 5;
                     else if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
