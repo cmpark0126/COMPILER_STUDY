@@ -77,18 +77,26 @@ public boolean Scan(String line){
                 endIdx++;
             }
 
-            if(startIdx != endIdx){ // analyze token
+            if (endIdx == sizeOfLine){
+                if(nextState(' ', curState) == DELIMITER) {
+                    String token = line.substring(startIdx, endIdx);
+                    AnalyzeToken(token);
+                } else {
+                    System.out.println(line.substring(startIdx, endIdx) + " is Rejected!");
+                    System.out.println("Please reprograming!");
+                    System.exit(-1);
+                }
+                break;
+            }else if(startIdx != endIdx){ // analyze token
                 String token = line.substring(startIdx, endIdx);
                 AnalyzeToken(token);
             } else { // blank .etc
                 endIdx++;
             }
 
-            if(endIdx >= sizeOfLine) break;
-            else {
-                curState = 0;
-                startIdx = endIdx;
-            }
+            if(endIdx == sizeOfLine) break;
+            curState = 0;
+            startIdx = endIdx;
         }
     } catch(Exception e) {
         System.out.println("Usage : Scan(line:String):boolean fault");
