@@ -40,7 +40,7 @@ public boolean Scan(File file){
             // if there is no nextline : break;
             String line = kb.nextLine(); // dummy
             if(line.charAt(0) == 'e') break; // dummy
-            this.Scan(line);
+            Scan(line);
         }
 
         kb.close(); // dummy
@@ -66,12 +66,17 @@ public boolean Scan(String line){
         while(true){
             for(int i = startIdx; i < sizeOfLine; i++){
                 endIdx++;
-                curState = this.nextState(line.charAt(i));
+                curState = nextState(line.charAt(i), curState);
                 if(curState == DELIMETER) break;
+                else if(curState == ERROR) {
+                    System.out.println(line.substring(startIdx, endIdx) + " has error!");
+                    System.out.println("Please reprograming!");
+                    System.exit(-1);
+                }
             }
             String token = line.substring(startIdx, endIdx);
             // analyze token
-            this.AnalyzeToken(token);
+            AnalyzeToken(token);
 
             if(endIdx >= sizeOfLine) break;
             curState = 0;
@@ -85,21 +90,58 @@ public boolean Scan(String line){
 
 }
 
-public int nextState(char ch){
-    System.out.println("nextState(ch:char):int");
+public int nextState(char ch, int curState){
+    System.out.println("nextState(ch:char, curState:int):int");
+    int nextState = 0;
     try {
-        return DELIMETER;
+        switch (curState) {
+            case 0: if(isLetter(ch)) nextState = 1;
+                    else if(ch == ' ' ||
+                            ch == ';' ||
+                            ch == ',') nextState = DELIMETER;
+                    else if(ch == '=') nextState = 2;
+                    else if(isDigit(ch)) nextState = 4;
+                    else nextState = ERROR;
+                    break;
+            case 1: if(isLetter(ch) || isDigit(ch)) nextState = 1;
+                    else if(ch == ' ' || ch == ';' ||
+                            ch == ',' || ch == '=') nextState = DELIMETER;
+                    else nextState = ERROR;
+                    break;
+            case 2: if(ch == '=' || ch == '>' || ch == '<') nextState = 3;
+                    else if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMETER;
+                    else nextState = ERROR;
+                    break;
+            case 3: if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMETER;
+                    else nextState = ERROR;
+                    break;
+            case 4: if(isDigit(ch)) nextState = 4;
+                    else if(ch == ' ' || ch == ';' ||
+                            ch == ',' || ch == '=') nextState = DELIMETER;
+                    else nextState = ERROR;
+                    break;
+            default: return ERROR;
+        }
     } catch(Exception e) {
-        System.out.println("Usage : nextState(ch:char):int fault");
+        System.out.println("Usage : nextState(ch:char, curState:int):int fault");
     }
 
-    return ERROR;
+    return nextState;
+}
+
+public static boolean isDigit(char ch){
+    return (ch >= 48 && ch <= 57)? true : false;
+}
+
+public static boolean isLetter(char ch){
+    return ((ch >= 65 && ch <= 90) ||
+            (ch >= 97 && ch <= 122))? true : false;
 }
 
 public void AnalyzeToken(String token){
     System.out.println("AnalyzeToken(token:String):void");
     try {
-        System.out.println(token);
+        System.out.println("analysis: " + token);
     } catch(Exception e) {
         System.out.println("Usage : AnalyzeToken(token:String):void fault");
     }
