@@ -76,17 +76,19 @@ public boolean Scan(String line){
                 }
                 endIdx++;
             }
-            if(startIdx != endIdx || sizeOfLine == endIdx){
+
+            if(startIdx != endIdx){ // analyze token
                 String token = line.substring(startIdx, endIdx);
-                // analyze token
                 AnalyzeToken(token);
-            } else {
+            } else { // blank .etc
                 endIdx++;
             }
 
             if(endIdx >= sizeOfLine) break;
-            curState = 0;
-            startIdx = endIdx;
+            else {
+                curState = 0;
+                startIdx = endIdx;
+            }
         }
     } catch(Exception e) {
         System.out.println("Usage : Scan(line:String):boolean fault");
