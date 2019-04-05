@@ -109,7 +109,7 @@ public int nextState(char ch, int curState){
                     else nextState = ERROR;
                     break;
             case 1: if(isLetter(ch) || isDigit(ch)) nextState = 1;
-                    else if(ch == '.') nextState = 1;
+                    else if(ch == '.') nextState = 6;
                     else if(ch == ' ' || ch == ';' ||
                             ch == ',' || ch == '=' ||
                             ch == '(') nextState = DELIMITER;
