@@ -112,18 +112,20 @@ public int nextState(char ch, int curState){
             case 0: if(isLetter(ch)) nextState = 1;
                     else if(ch == ' ') nextState = DELIMITER;
                     else if(ch == ';' || ch == ',') nextState = 5;
-                    else if(ch == '=') nextState = 2;
+                    else if(ch == '=' || ch == '>' || ch == '<') nextState = 2;
                     else if(isDigit(ch)) nextState = 4;
+                    else if(ch == '(') nextState = 7;
                     else nextState = ERROR;
                     break;
             case 1: if(isLetter(ch) || isDigit(ch)) nextState = 1;
                     else if(ch == '.') nextState = 6;
                     else if(ch == ' ' || ch == ';' ||
                             ch == ',' || ch == '=' ||
+                            ch == '>' || ch == '<' ||
                             ch == '(') nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
-            case 2: if(ch == '=' || ch == '>' || ch == '<') nextState = 3;
+            case 2: if(ch == '=') nextState = 3;
                     else if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
@@ -132,13 +134,17 @@ public int nextState(char ch, int curState){
                     break;
             case 4: if(isDigit(ch)) nextState = 4;
                     else if(ch == ' ' || ch == ';' ||
-                            ch == ',' || ch == '=') nextState = DELIMITER;
+                            ch == ',' || ch == '=' ||
+                            ch == '>' || ch == '<') nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
             case 5: nextState = DELIMITER;
                     break;
             case 6: if(isLetter(ch)) nextState = 1;
                     else nextState = ERROR;
+                    break;
+            case 7: if(ch == ')') nextState = 5;
+                    else nextState = 7;
                     break;
             default: nextState = ERROR;
         }
