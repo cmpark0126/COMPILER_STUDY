@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class MyScanner {
 private boolean isScript = false;
-private static final int DELIMETER = -1;
+private static final int DELIMITER = -1;
 private static final int ERROR = -2;
 
 public static void main(String[] args) {
@@ -65,29 +65,33 @@ public boolean Scan(String line){
     try {
         while(true){
             for(int i = startIdx; i < sizeOfLine; i++){
-                endIdx++;
                 curState = nextState(line.charAt(i), curState);
-                if(curState == DELIMETER) break;
+                if(curState == DELIMITER) {
+                    endIdx = i;
+                    break;
+                }
                 else if(curState == ERROR) {
                     System.out.println(line.substring(startIdx, endIdx) + " has error!");
                     System.out.println("Please reprograming!");
                     System.exit(-1);
                 }
             }
-            String token = line.substring(startIdx, endIdx);
-            // analyze token
-            AnalyzeToken(token);
+            if(startIdx != endIdx){
+                String token = line.substring(startIdx, endIdx);
+                // analyze token
+                AnalyzeToken(token);
+            } else {
+                endIdx++;
+            }
 
             if(endIdx >= sizeOfLine) break;
             curState = 0;
             startIdx = endIdx;
         }
-
     } catch(Exception e) {
         System.out.println("Usage : Scan(line:String):boolean fault");
     }
     return true;
-
 }
 
 public int nextState(char ch, int curState){
@@ -98,26 +102,26 @@ public int nextState(char ch, int curState){
             case 0: if(isLetter(ch)) nextState = 1;
                     else if(ch == ' ' ||
                             ch == ';' ||
-                            ch == ',') nextState = DELIMETER;
+                            ch == ',') nextState = DELIMITER;
                     else if(ch == '=') nextState = 2;
                     else if(isDigit(ch)) nextState = 4;
                     else nextState = ERROR;
                     break;
             case 1: if(isLetter(ch) || isDigit(ch)) nextState = 1;
                     else if(ch == ' ' || ch == ';' ||
-                            ch == ',' || ch == '=') nextState = DELIMETER;
+                            ch == ',' || ch == '=') nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
             case 2: if(ch == '=' || ch == '>' || ch == '<') nextState = 3;
-                    else if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMETER;
+                    else if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
-            case 3: if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMETER;
+            case 3: if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
             case 4: if(isDigit(ch)) nextState = 4;
                     else if(ch == ' ' || ch == ';' ||
-                            ch == ',' || ch == '=') nextState = DELIMETER;
+                            ch == ',' || ch == '=') nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
             default: return ERROR;
