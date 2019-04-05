@@ -7,7 +7,8 @@ import java.io.IOException;
 
 public class MyScanner {
 private boolean isScript = false;
-private int currentState = 0;
+private static final int DELIMETER = -1;
+private static final int ERROR = -2;
 
 public static void main(String[] args) {
     System.out.println("main:void");
@@ -50,19 +51,33 @@ public boolean Scan(File file){
     return true;
 }
 
+// we need to fix to follow under condition
 public boolean Scan(String line){
+    // if "var m = 0, h = 1;", we need to finish all of the setting
+    // we need to consider '\n' character when we use scanner
+    // until we meet the symbol ';', we need to think all of the token on one line and on circumstance
+    // token can be splited by sub token
     System.out.println("Scan(line:String):boolean");
     int sizeOfLine = line.length();
     int startIdx = 0;
     int endIdx = 0;
+    int curState = 0;
     try {
         while(true){
-            endIdx = this.GetTokenIdx(line, startIdx);
-            // match token symbol from hash table and print information of that symbol
+            for(int i = startIdx; i < sizeOfLine; i++){
+                endIdx++;
+                curState = this.nextState(line.charAt(i));
+                if(curState == DELIMETER) break;
+            }
+            String token = line.substring(startIdx, endIdx);
+            // analyze token
+            this.AnalyzeToken(token);
 
-            startIdx = endIdx + 2; // over delimeter
-            if(sizeOfLine <= startIdx) break;
+            if(endIdx >= sizeOfLine) break;
+            curState = 0;
+            startIdx = endIdx;
         }
+
     } catch(Exception e) {
         System.out.println("Usage : Scan(line:String):boolean fault");
     }
@@ -70,30 +85,26 @@ public boolean Scan(String line){
 
 }
 
-// we need to fix to follow under condition
-public int GetTokenIdx(String line, int startIdx){
-    // if "var m = 0, h = 1;", we need to finish all of the setting
-    // we need to consider '\n' character when we use scanner
-    System.out.println("GetTokenIdx(line:String, startIdx:int):int");
-    int endIdx = startIdx;
+public int nextState(char ch){
+    System.out.println("nextState(ch:char):int");
     try {
-        currentState = NextState('e');
+        return DELIMETER;
     } catch(Exception e) {
-        System.out.println("Usage : GetTokenIdx(line:String, startIdx:int):int fault");
+        System.out.println("Usage : nextState(ch:char):int fault");
     }
 
-    return endIdx;
+    return ERROR;
 }
 
-public int NextState(char ch){
-    System.out.println("NextState(ch:char):int");
+public void AnalyzeToken(String token){
+    System.out.println("AnalyzeToken(token:String):void");
     try {
-
+        System.out.println(token);
     } catch(Exception e) {
-        System.out.println("Usage : NextState(ch:char):int fault");
+        System.out.println("Usage : AnalyzeToken(token:String):void fault");
     }
 
-    return -1;
+    return;
 }
 
 }
