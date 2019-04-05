@@ -70,7 +70,7 @@ public boolean Scan(String line){
                     break;
                 }
                 else if(curState == ERROR) {
-                    System.out.println(line.substring(startIdx, endIdx) + " has error!");
+                    System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected!");
                     System.out.println("Please reprograming!");
                     System.exit(-1);
                 }
@@ -109,8 +109,10 @@ public int nextState(char ch, int curState){
                     else nextState = ERROR;
                     break;
             case 1: if(isLetter(ch) || isDigit(ch)) nextState = 1;
+                    else if(ch == '.') nextState = 1;
                     else if(ch == ' ' || ch == ';' ||
-                            ch == ',' || ch == '=') nextState = DELIMITER;
+                            ch == ',' || ch == '=' ||
+                            ch == '(') nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
             case 2: if(ch == '=' || ch == '>' || ch == '<') nextState = 3;
@@ -126,6 +128,9 @@ public int nextState(char ch, int curState){
                     else nextState = ERROR;
                     break;
             case 5: nextState = DELIMITER;
+                    break;
+            case 6: if(isLetter(ch)) nextState = 1;
+                    else nextState = ERROR;
                     break;
             default: nextState = ERROR;
         }
