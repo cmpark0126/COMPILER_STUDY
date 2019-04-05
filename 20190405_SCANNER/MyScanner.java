@@ -67,7 +67,6 @@ public boolean Scan(String line){
             for(int i = startIdx; i < sizeOfLine; i++){
                 curState = nextState(line.charAt(i), curState);
                 if(curState == DELIMITER) {
-                    endIdx = i;
                     break;
                 }
                 else if(curState == ERROR) {
@@ -75,8 +74,9 @@ public boolean Scan(String line){
                     System.out.println("Please reprograming!");
                     System.exit(-1);
                 }
+                endIdx++;
             }
-            if(startIdx != endIdx){
+            if(startIdx != endIdx || sizeOfLine == endIdx){
                 String token = line.substring(startIdx, endIdx);
                 // analyze token
                 AnalyzeToken(token);
@@ -100,9 +100,8 @@ public int nextState(char ch, int curState){
     try {
         switch (curState) {
             case 0: if(isLetter(ch)) nextState = 1;
-                    else if(ch == ' ' ||
-                            ch == ';' ||
-                            ch == ',') nextState = DELIMITER;
+                    else if(ch == ' ') nextState = DELIMITER;
+                    else if(ch == ';' || ch == ',') nextState = 5;
                     else if(ch == '=') nextState = 2;
                     else if(isDigit(ch)) nextState = 4;
                     else nextState = ERROR;
@@ -124,7 +123,9 @@ public int nextState(char ch, int curState){
                             ch == ',' || ch == '=') nextState = DELIMITER;
                     else nextState = ERROR;
                     break;
-            default: return ERROR;
+            case 5: nextState = DELIMITER;
+                    break;
+            default: nextState = ERROR;
         }
     } catch(Exception e) {
         System.out.println("Usage : nextState(ch:char, curState:int):int fault");
