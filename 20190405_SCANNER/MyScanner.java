@@ -108,6 +108,8 @@ public boolean Scan(String line){
 }
 
 public int nextState(char ch, int curState){
+    // we need to simplify the algorithm, and increase extencability
+    // do not consider grammer issue
     System.out.println("nextState(ch:char, curState:int):int");
     int nextState = 0;
     try {
