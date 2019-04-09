@@ -24,7 +24,8 @@ private static final int DIVISOR = 0x100;
 private static final int ERROR = 0xff00; // rarely use group state
 private static final int DELIMITER = 0xff01;
 private static final int SKIP = 0xff02;
-private static final int DELIMITER_FROM_DFA_OF_LITERAL = 0xff03;
+private static final int DELIMITER_FROM_DFA_OF_NUMBER = 0xff03;
+private static final int DELIMITER_FROM_DFA_OF_LITERAL = 0xff04;
 
 
 public static void main(String[] args) {
@@ -140,6 +141,7 @@ public boolean InitializeDelimiterMap(){
         m_delimiterMap = new HashMap<>();
 
         // resulved symbol
+        m_delimiterMap.put(DELIMITER_FROM_DFA_OF_NUMBER,"number");
         m_delimiterMap.put(DELIMITER_FROM_DFA_OF_LITERAL,"literal");
 
     } catch(Exception e) {
@@ -292,7 +294,7 @@ public static int DFAForNumber(char ch, int curState){
         switch (curState % DIVISOR) { // Need to reduce redundancy
             case 0x00: if(IsDigit(ch)) nextState = curState;
                        else if(ch == '.') nextState = CalculateNextState(curState, 0x01);
-                       else if(IsSpecialChar(ch) || IsOperatorOrSign(ch) || IsBlankChar(ch)) nextState = DELIMITER;
+                       else if(IsSpecialChar(ch) || IsOperatorOrSign(ch) || IsBlankChar(ch)) nextState = DELIMITER_FROM_DFA_OF_NUMBER;
                        break;
             case 0x01: if(IsDigit(ch)) nextState = CalculateNextState(curState, 0x00);
                        else nextState = ERROR;
