@@ -231,6 +231,7 @@ public static int FindNextState(char ch, int curState){
                        else if(ch == '+') nextState = CalculateNextState(0x08);
                        else if(ch == '-') nextState = CalculateNextState(0x09);
                        else if(ch == '*' || ch == '/' || ch == '%') nextState = CalculateNextState(0x0a);
+                       else if(ch == ' ' || ch == '\t') nextState = CalculateNextState(0x0b);
                        else nextState = ERROR;
                        break;
             case 0x01: nextState = DFAForNumber(ch, curState);
@@ -252,6 +253,8 @@ public static int FindNextState(char ch, int curState){
             case 0x09: nextState = DFAForStartWithMinusSign(ch, curState);
                        break;
             case 0x0a: nextState = DFAForStartWithOtherSign(ch, curState);
+                       break;
+            case 0x0b: nextState = DFAForBlankAndTab(ch, curState);
                        break;
             default: nextState = ERROR;
         }
@@ -461,6 +464,23 @@ public static int DFAForStartWithOtherSign(char ch, int curState){
     return nextState;
 }
 
+public static int DFAForBlankAndTab(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState % DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(ch == ' ' || ch == '\t') nextState = curState;
+                       else nextState = SKIP;
+                       break;
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
 public static boolean IsDigit(char ch){
     return (ch >= 48 && ch <= 57)? true : false;
 }
@@ -478,7 +498,7 @@ public static boolean IsSpecialChar(char ch){
     return (ch == '(' || ch == ')' ||
             ch == '{' || ch == '}' ||
             ch == ';' || ch == ':' ||
-            ch == ',' || ch == ' ' )? true : false;
+            ch == ',' )? true : false;
 }
 
 public static boolean IsOperatorOrSign(char ch){
