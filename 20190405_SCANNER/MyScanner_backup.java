@@ -6,97 +6,106 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class MyScanner {
-private File m_file = null;
-private String m_curLine = null;
-private int m_lineLength = 0;
-private int m_startIdx = 0;
-private int m_endIdx = 0;
-private Scanner kb = null; // dummy
-
+private File file = null;
+private boolean isScript = false;
 private static final int DELIMITER = -1;
 private static final int ERROR = -2;
 
 public static void main(String[] args) {
+    System.out.println("main:void");
     try {
         File file = null; // dummy
         MyScanner scanner = new MyScanner(file);
         // Need to open java script file
-        while(true) {
-            scanner.Scan();
-        }
+        scanner.Scan();
     } catch(Exception e) {
-        e.printStackTrace();
-        System.out.println(e);
-        System.exit(-1);
+        System.out.println("Usage : main fault");
     }
 }
 
 public MyScanner(File file){
+    System.out.println("MyScanner()");
     try {
-        this.m_file = file;
-        this.kb = new Scanner(System.in);
+        this.file = file;
     } catch(Exception e) {
-        e.printStackTrace();
-        System.out.println(e);
-        System.exit(-1);
+        System.out.println("Usage : Constructor fault");
     }
 }
 
-public String Scan(){
-    String token = null;
+public boolean Scan(){
+    System.out.println("Scan(file:File):boolean");
     try {
-        // System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
-        if (m_startIdx >= m_lineLength){
-            // m_curLine := nextLine from file pointer
-            m_curLine = kb.nextLine(); // dummy
-            m_lineLength = m_curLine.length(); // initialization
-            m_startIdx = 0; // initialization
-            m_endIdx = 0; // initialization
+        Scanner kb = new Scanner(System.in); // dummy
+        // read nextLine from file
+        while(true){
+            // if there is no nextline : break;
+            String line = kb.nextLine(); // dummy
+            if(line.charAt(0) == 'e') break; // dummy
+            Scan(line);
         }
-        m_endIdx = Scan(m_curLine, m_startIdx, m_endIdx);
-        token = m_curLine.substring(m_startIdx, m_endIdx);
-        AnalyzeToken(token); // after every implementation, we need to check blank character;
 
-        m_startIdx = m_endIdx;
+        kb.close(); // dummy
     } catch(Exception e) {
-        e.printStackTrace();
-        System.out.println(e);
-        System.exit(-1);
+        System.out.println("Usage : Scan(file:File):boolean fault");
     }
 
-    return token;
+    return true;
 }
 
-public static int Scan(String line, int startIdx, int endIdx){
+// we need to fix to follow under condition
+public boolean Scan(String line){
+    // if "var m = 0, h = 1;", we need to finish all of the setting
+    // we need to consider '\n' character when we use scanner
+    // until we meet the symbol ';', we need to think all of the token on one line and on circumstance
+    // token can be splited by sub token
+    // we need to consider annotation
+    // we need to consider whether the parenthesis is behind the function identifier or not
+    // If the parenthesis is behind the reserved id like while, for, if, we need to analyze the sentence between the parenthesis
+    System.out.println("Scan(line:String):boolean");
     int sizeOfLine = line.length();
+    int startIdx = 0;
+    int endIdx = 0;
     int curState = 0;
     try {
-        for(int i = startIdx; i < sizeOfLine; i++){
-            curState = nextState(line.charAt(i), curState);
-            if(curState == DELIMITER) {
+        while(true){
+            for(int i = startIdx; i < sizeOfLine; i++){
+                curState = nextState(line.charAt(i), curState);
+                if(curState == DELIMITER) {
+                    break;
+                }
+                else if(curState == ERROR) {
+                    System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected!");
+                    System.out.println("Please reprograming!");
+                    System.exit(-1);
+                }
+                endIdx++;
+            }
+
+            if (endIdx == sizeOfLine){
+                if(nextState(' ', curState) == DELIMITER) {
+                    String token = line.substring(startIdx, endIdx);
+                    AnalyzeToken(token);
+                } else {
+                    System.out.println(line.substring(startIdx, endIdx) + " is Rejected!");
+                    System.out.println("Please reprograming!");
+                    System.exit(-1);
+                }
                 break;
+            }else if(startIdx != endIdx){ // analyze token
+                String token = line.substring(startIdx, endIdx);
+                AnalyzeToken(token);
+            } else { // blank .etc
+                endIdx++;
             }
-            else if(curState == ERROR) {
-                System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected!");
-                System.exit(-1);
-            }
-            endIdx++;
-        }
 
-        if (endIdx == sizeOfLine){
-            if(nextState(' ', curState) != DELIMITER) {
-                System.out.println(line.substring(startIdx, endIdx) + " is Rejected!");
-                System.exit(-1);
-            }
+            if(endIdx == sizeOfLine) break;
+            curState = 0;
+            startIdx = endIdx;
         }
-
     } catch(Exception e) {
-        e.printStackTrace();
-        System.out.println(e);
-        System.exit(-1);
+        System.out.println("Usage : Scan(line:String):boolean fault");
     }
-
-    return endIdx;
+    return true;
 }
 
 public static int nextState(char ch, int curState){
@@ -107,7 +116,8 @@ public static int nextState(char ch, int curState){
     try {
         switch (curState) { // Need to reduce redundancy
             case 0: if(isLetter(ch)) nextState = 1;
-                    else if(ch == ';' || ch == ':' || ch == ',' || ch == ' ') nextState = 5;
+                    else if(ch == ' ') nextState = DELIMITER;
+                    else if(ch == ';' || ch == ':' || ch == ',') nextState = 5;
                     else if(ch == '=' || ch == '>' ||
                             ch == '<' || ch == '*' ||
                             ch == '/' || ch == '%') nextState = 2;
@@ -178,12 +188,11 @@ public static boolean isLetter(char ch){
 }
 
 public static void AnalyzeToken(String token){
+    System.out.println("AnalyzeToken(token:String):void");
     try {
         System.out.println("analysis: " + token);
     } catch(Exception e) {
-        e.printStackTrace();
-        System.out.println(e);
-        System.exit(-1);
+        System.out.println("Usage : AnalyzeToken(token:String):void fault");
     }
 
     return;
