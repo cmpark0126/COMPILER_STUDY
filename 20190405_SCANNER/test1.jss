@@ -1,6 +1,7 @@
 <script_start>
+// initialization
 var passes = 0;
-student = 1,
+student = 1, // student counter
 result;
 var number, sum = 0;
 var input1 = window.prompt("Enter the first number");
@@ -13,6 +14,7 @@ while(student <= 5) {
         failures++;
         ++student;
 }
+// termination phase
 document.writeln("<h1>Examination Result</h1>");
 document.writeln("<h2>Passed and Failed Numbers</h2>");
 if(passes > 8)
