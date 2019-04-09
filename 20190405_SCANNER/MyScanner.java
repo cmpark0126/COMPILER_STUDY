@@ -117,7 +117,7 @@ public static int FindNextState(char ch, int curState){
     try {
         switch (curState / DIVISOR) { // Need to reduce redundancy
             case 0x00: if(IsDigit(ch)) nextState = CalculateNextState(0x01);
-                       else if(IsLetter(ch)) nextState = CalculateNextState(0x02);
+                       else if(IsLetter(ch) || IsSpecialCharForId(ch)) nextState = CalculateNextState(0x02);
                        else if(IsSpecialChar(ch)) nextState = CalculateNextState(0x03);
                        else if(ch == '\"') nextState = CalculateNextState(0x04);
                        else if(ch == '=') nextState = CalculateNextState(0x05);
@@ -184,7 +184,7 @@ public static int DFAForId(char ch, int curState){
     int nextState = 0;
     try {
         switch (curState % DIVISOR) { // Need to reduce redundancy
-            case 0x00: if(IsLetter(ch) || IsDigit(ch)) nextState = curState;
+            case 0x00: if(IsLetter(ch) || IsSpecialCharForId(ch) || IsDigit(ch) ) nextState = curState;
                        else if(ch == '.') nextState = CalculateNextState(curState, 0x01);
                        else if(IsSpecialChar(ch) || IsOperatorOrSign(ch)) nextState = DELIMITER;
                        break;
@@ -275,6 +275,23 @@ public static int DFAForStartWithLessThan(char ch, int curState){
     int nextState = 0;
     try {
         switch (curState % DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(ch == '=') nextState = CalculateNextState(curState, 0x01);
+                       else if(ch == '<') nextState = CalculateNextState(curState, 0x01);
+                       else if(IsLetter(ch)) nextState = CalculateNextState(curState, 0x02);
+                       else if(ch == '/') nextState = CalculateNextState(curState, 0x03);
+                       break;
+            case 0x01: if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
+            case 0x02: if(ch == '>') nextState = CalculateNextState(curState, 0x04);
+                       else if(IsLetter(ch) || IsSpecialCharForId(ch) || IsDigit(ch)) nextState = curState;
+                       else nextState = DELIMITER;
+                       break;
+            case 0x03: if(IsLetter(ch)) nextState = CalculateNextState(curState, 0x02);
+                       else nextState = ERROR;
+                       break;
+            case 0x04: nextState = DELIMITER;
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -334,6 +351,10 @@ public static boolean IsDigit(char ch){
 public static boolean IsLetter(char ch){
     return ((ch >= 65 && ch <= 90) ||
             (ch >= 97 && ch <= 122))? true : false;
+}
+
+public static boolean IsSpecialCharForId(char ch){
+    return (ch == '_' || ch == '$')? true : false;
 }
 
 public static boolean IsSpecialChar(char ch){
