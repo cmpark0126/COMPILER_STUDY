@@ -11,7 +11,6 @@ private String m_curLine = "";
 private int m_lineLength = 0;
 private int m_startIdx = 0;
 private int m_endIdx = 0;
-private Scanner kb = null; // dummy
 
 private static final int DIVISOR = 0x100;
 private static final int DELIMITER = 0xff00; // rarely use state
@@ -27,7 +26,7 @@ public static void main(String[] args) {
     try {
         System.out.println("Sample running result is given below:");
         filename = kb.nextLine();
-        file = new File(filename); // dummy
+        file = new File(filename);
 
         scanner = new MyScanner(file);
         // Need to open java script file
@@ -50,7 +49,6 @@ public MyScanner(File file){
     try {
         fileReader = new FileReader(file);
         this.m_bufReader = new BufferedReader(fileReader);
-        this.kb = new Scanner(System.in);
     } catch(Exception e) {
         e.printStackTrace();
         System.out.println(e);
@@ -67,7 +65,6 @@ public String Scan(){
                 do{
                     if((m_curLine = m_bufReader.readLine()) == null) return null;
                     // m_curLine := nextLine from file pointer
-                    // m_curLine = kb.nextLine(); // dummy
                     m_lineLength = m_curLine.length(); // initialization
                     m_startIdx = 0; // initialization
                     m_endIdx = 0; // initialization
