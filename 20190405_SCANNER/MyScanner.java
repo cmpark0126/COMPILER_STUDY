@@ -17,9 +17,9 @@ HashMap<String, String> m_reservedSymbolMap = null;
 
 private static final int DIVISOR = 0x100;
 
-private static final int DELIMITER = 0xff00; // rarely use state
-private static final int ERROR = 0xfe00;
-private static final int SKIP = 0xfd00;
+private static final int ERROR = 0xff00; // rarely use group state
+private static final int DELIMITER = 0xff01;
+private static final int SKIP = 0xff02;
 
 
 public static void main(String[] args) {
@@ -168,12 +168,12 @@ public static int Scan(String line, int startIdx, int endIdx){
         for(int i = startIdx; i < sizeOfLine; i++){
             curState = FindNextState(line.charAt(i), curState);
             // System.out.println(String.format("0x%08X", curState));
-            if(curState == DELIMITER) {
+            if((curState / 0x100) == 0xff) { // special state case check
+                if(curState == ERROR){
+                    System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected! 1");
+                    System.exit(-1);
+                }
                 break;
-            }
-            else if(curState == ERROR) {
-                System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected! 1");
-                System.exit(-1);
             }
             endIdx++;
         }
