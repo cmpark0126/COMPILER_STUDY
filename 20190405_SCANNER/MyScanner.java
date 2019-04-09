@@ -13,6 +13,7 @@ private String m_curLine = "";
 private int m_lineLength = 0;
 private int m_startIdx = 0;
 private int m_endIdx = 0;
+private int m_typeOfDelimiter = 0;
 HashMap<String, String> m_reservedSymbolMap = null;
 
 private static final int DIVISOR = 0x100;
@@ -130,6 +131,7 @@ public boolean InitializeReservedSymbolMap(){
 }
 
 public String Scan(){
+    InfoOfToken info = null;
     String token = null;
     try {
         while(true){
@@ -143,12 +145,17 @@ public String Scan(){
                     m_endIdx = 0; // initialization
                 } while(m_lineLength <= 0);
             }
-            m_endIdx = Scan(m_curLine, m_startIdx, m_endIdx);
-            token = m_curLine.substring(m_startIdx, m_endIdx);
-            m_startIdx = m_endIdx;
+            info = Scan(m_curLine, m_startIdx, m_endIdx);
+            m_typeOfDelimiter = info.m_typeOfDelimiter;
+            if(m_typeOfDelimiter != SKIP) break;
 
-            if(token.charAt(0) != ' ') break;
+            m_endIdx = info.m_endIdx;
+            m_startIdx = m_endIdx;
         }
+
+        m_endIdx = info.m_endIdx;
+        token = m_curLine.substring(m_startIdx, m_endIdx);
+        m_startIdx = m_endIdx;
 
         AnalyzeToken(token); // after every implementation, we need to check blank character;
 
@@ -161,9 +168,10 @@ public String Scan(){
     return token;
 }
 
-public static int Scan(String line, int startIdx, int endIdx){
+public static InfoOfToken Scan(String line, int startIdx, int endIdx){
     int sizeOfLine = line.length();
     int curState = 0;
+    InfoOfToken info = null;
     try {
         for(int i = startIdx; i < sizeOfLine; i++){
             curState = FindNextState(line.charAt(i), curState);
@@ -186,13 +194,17 @@ public static int Scan(String line, int startIdx, int endIdx){
             }
         }
 
+        info = new InfoOfToken();
+        info.m_typeOfDelimiter = curState;
+        info.m_endIdx = endIdx;
+
     } catch(Exception e) {
         e.printStackTrace();
         System.out.println(e);
         System.exit(-1);
     }
 
-    return endIdx;
+    return info;
 }
 
 public static int CalculateNextState(int groupState){
@@ -494,4 +506,9 @@ public void AnalyzeToken(String token){
     return;
 }
 
+}
+
+class InfoOfToken {
+    public int m_typeOfDelimiter = 0;
+    public int m_endIdx = 0;
 }
