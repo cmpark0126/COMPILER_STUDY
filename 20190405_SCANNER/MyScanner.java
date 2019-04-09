@@ -306,6 +306,13 @@ public static int DFAForStartWithPlusSign(char ch, int curState){
     int nextState = 0;
     try {
         switch (curState % DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(ch == '=' || ch == '+') nextState = CalculateNextState(curState, 0x01);
+                       else if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
+            case 0x01: if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -320,6 +327,13 @@ public static int DFAForStartWithMinusSign(char ch, int curState){
     int nextState = 0;
     try {
         switch (curState % DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(ch == '=' || ch == '-') nextState = CalculateNextState(curState, 0x01);
+                       else if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
+            case 0x01: if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -334,6 +348,13 @@ public static int DFAForStartWithOtherSign(char ch, int curState){
     int nextState = 0;
     try {
         switch (curState % DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(ch == '=') nextState = CalculateNextState(curState, 0x01);
+                       else if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
+            case 0x01: if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
