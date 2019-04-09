@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.ArrayList;
 
 public class MyScanner {
     private BufferedReader m_bufReader = null;
@@ -16,8 +17,8 @@ public class MyScanner {
     private int m_endIdx = 0;
     private int m_typeOfDelimiter = 0;
     private String m_token = "";
-    HashMap<String, String> m_reservedSymbolMap = null;
-    HashMap<Integer, String> m_delimiterMap = null;
+    private HashMap<String, String> m_reservedSymbolMap = null;
+    private HashMap<Integer, String> m_delimiterMap = null;
 
     private static final int DIVISOR = 0x100;
 
@@ -62,7 +63,9 @@ public class MyScanner {
         FileReader fileReader = null;
         try {
             fileReader = new FileReader(file);
-            this.m_bufReader = new BufferedReader(fileReader);
+            m_bufReader = new BufferedReader(fileReader);
+            m_reservedSymbolMap = new HashMap<>();
+            m_delimiterMap = new HashMap<>();
             InitializeReservedSymbolMap();
             InitializeDelimiterMap();
         } catch(Exception e) {
@@ -74,8 +77,6 @@ public class MyScanner {
 
     public boolean InitializeReservedSymbolMap(){
         try {
-            m_reservedSymbolMap = new HashMap<>();
-
             // resulved symbol
             m_reservedSymbolMap.put("<script_start>","keyword");
             m_reservedSymbolMap.put("var","keyword");
@@ -140,9 +141,6 @@ public class MyScanner {
 
     public boolean InitializeDelimiterMap(){
         try {
-            m_delimiterMap = new HashMap<>();
-
-            // resulved symbol
             m_delimiterMap.put(DELIMITER_FROM_DFA_OF_NUMBER,"number");
             m_delimiterMap.put(DELIMITER_FROM_DFA_OF_LITERAL,"literal");
 
@@ -537,7 +535,7 @@ public class MyScanner {
         String infoOfToken = "";
         ScanLiteral scanner = null;
         try {
-            // Optional task
+            // for Optional task
             if(typeOfDelimiter == DELIMITER_FROM_DFA_OF_LITERAL){
                 scanner = new ScanLiteral(token);
                 if(scanner.Scan() == true) return;
@@ -569,6 +567,37 @@ class InfoOfToken {
     public int m_typeOfDelimiter = 0;
     public int m_endIdx = 0;
     public String m_token = "";
+}
+
+class SimpleGrammerChecker {
+    private HashMap<String, Integer> m_tokenMap = null;
+    private ArrayList<String> m_arrayOfToken = null;
+
+    public SimpleGrammerChecker(){
+        try {
+            m_arrayOfToken = new ArrayList<String>();
+            m_tokenMap = new HashMap<>();
+            InitializeTokenMap();
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+            System.exit(-1);
+        }
+    }
+
+    public boolean InitializeTokenMap(){
+        try {
+            m_tokenMap.put("<", 1);
+            m_tokenMap.put("/", 2);
+            m_tokenMap.put(">", 3);
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+            System.exit(-1);
+        }
+        return true;
+    }
 }
 
 class ScanLiteral {
