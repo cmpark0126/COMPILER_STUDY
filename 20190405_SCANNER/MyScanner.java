@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+
 
 public class MyScanner {
 private BufferedReader m_bufReader = null;
@@ -11,10 +13,14 @@ private String m_curLine = "";
 private int m_lineLength = 0;
 private int m_startIdx = 0;
 private int m_endIdx = 0;
+HashMap<String, String> m_reservedSymbolMap = null;
 
 private static final int DIVISOR = 0x100;
+
 private static final int DELIMITER = 0xff00; // rarely use state
 private static final int ERROR = 0xfe00;
+private static final int SKIP = 0xfd00;
+
 
 public static void main(String[] args) {
     Scanner kb = new Scanner(System.in);
@@ -49,11 +55,78 @@ public MyScanner(File file){
     try {
         fileReader = new FileReader(file);
         this.m_bufReader = new BufferedReader(fileReader);
+        InitializeReservedSymbolMap();
     } catch(Exception e) {
         e.printStackTrace();
         System.out.println(e);
         System.exit(-1);
     }
+}
+
+public boolean InitializeReservedSymbolMap(){
+    try {
+        m_reservedSymbolMap = new HashMap<>();
+
+        // resulved symbol
+        m_reservedSymbolMap.put("<script_start>","keyword");
+        m_reservedSymbolMap.put("var","keyword");
+        m_reservedSymbolMap.put("function","keyword");
+
+        // use for special statement
+        m_reservedSymbolMap.put("if","keyword");
+        m_reservedSymbolMap.put("for","keyword");
+        m_reservedSymbolMap.put("switch","keyword");
+        m_reservedSymbolMap.put("case","keyword");
+        m_reservedSymbolMap.put("break","keyword");
+        m_reservedSymbolMap.put("default","keyword");
+        m_reservedSymbolMap.put("do","keyword");
+        m_reservedSymbolMap.put("while","keyword");
+
+        // boolean symbol
+        m_reservedSymbolMap.put("false","keyword");
+        m_reservedSymbolMap.put("true","keyword");
+
+        // for function return
+        m_reservedSymbolMap.put("return","keyword");
+
+        // special character
+        m_reservedSymbolMap.put("(","character");
+        m_reservedSymbolMap.put(")","character");
+        m_reservedSymbolMap.put("{","character");
+        m_reservedSymbolMap.put("}","character");
+        m_reservedSymbolMap.put(";","character");
+        m_reservedSymbolMap.put(":","character");
+        m_reservedSymbolMap.put(",","character");
+
+        // operator and sign
+        m_reservedSymbolMap.put("=","operator");
+        m_reservedSymbolMap.put("==","operator");
+        m_reservedSymbolMap.put(">","operator");
+        m_reservedSymbolMap.put(">=","operator");
+        m_reservedSymbolMap.put(">>","operator");
+        m_reservedSymbolMap.put(">>>","operator");
+        m_reservedSymbolMap.put("<","operator");
+        m_reservedSymbolMap.put("<=","operator");
+        m_reservedSymbolMap.put("<<","operator");
+        m_reservedSymbolMap.put("+","operator");
+        m_reservedSymbolMap.put("+=","operator");
+        m_reservedSymbolMap.put("++","operator");
+        m_reservedSymbolMap.put("-","operator");
+        m_reservedSymbolMap.put("-=","operator");
+        m_reservedSymbolMap.put("--","operator");
+        m_reservedSymbolMap.put("*","operator");
+        m_reservedSymbolMap.put("*=","operator");
+        m_reservedSymbolMap.put("/","operator");
+        m_reservedSymbolMap.put("/=","operator");
+        m_reservedSymbolMap.put("%","operator");
+        m_reservedSymbolMap.put("%=","operator");
+
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return true;
 }
 
 public String Scan(){
@@ -403,9 +476,15 @@ public static boolean IsOperatorOrSign(char ch){
             ch == '/' || ch == '%' )? true : false;
 }
 
-public static void AnalyzeToken(String token){
+public void AnalyzeToken(String token){
+    String infoOfToken = "";
     try {
-        System.out.println("analysis: " + token);
+        infoOfToken = m_reservedSymbolMap.get(token);
+        if(infoOfToken != null) System.out.println(token + "\t" + infoOfToken);
+        else {
+            m_reservedSymbolMap.put(token,"user-defined id");
+            System.out.println(token + "\t" + m_reservedSymbolMap.get(token));
+        }
     } catch(Exception e) {
         e.printStackTrace();
         System.out.println(e);
