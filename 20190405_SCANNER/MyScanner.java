@@ -1,13 +1,13 @@
 import java.util.Scanner;
-
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
 public class MyScanner {
-private File m_file = null;
-private String m_curLine = null;
+private BufferedReader m_bufReader = null;
+private String m_curLine = "";
 private int m_lineLength = 0;
 private int m_startIdx = 0;
 private int m_endIdx = 0;
@@ -18,23 +18,38 @@ private static final int DELIMITER = 0xff00; // rarely use state
 private static final int ERROR = 0xfe00;
 
 public static void main(String[] args) {
+    Scanner kb = new Scanner(System.in);
+    String filename = "";
+    File file = null;
+    MyScanner scanner = null;
+    String token = "";
+
     try {
-        File file = null; // dummy
-        MyScanner scanner = new MyScanner(file);
+        System.out.println("Sample running result is given below:");
+        filename = kb.nextLine();
+        file = new File(filename); // dummy
+
+        scanner = new MyScanner(file);
         // Need to open java script file
         while(true) {
-            scanner.Scan();
+            token = scanner.Scan();
+            if(token == null) break;
         }
+
     } catch(Exception e) {
         e.printStackTrace();
         System.out.println(e);
         System.exit(-1);
     }
+
+    kb.close();
 }
 
 public MyScanner(File file){
+    FileReader fileReader = null;
     try {
-        this.m_file = file;
+        fileReader = new FileReader(file);
+        this.m_bufReader = new BufferedReader(fileReader);
         this.kb = new Scanner(System.in);
     } catch(Exception e) {
         e.printStackTrace();
@@ -48,11 +63,14 @@ public String Scan(){
     try {
         // System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
         if (m_startIdx >= m_lineLength){
-            // m_curLine := nextLine from file pointer
-            m_curLine = kb.nextLine(); // dummy
-            m_lineLength = m_curLine.length(); // initialization
-            m_startIdx = 0; // initialization
-            m_endIdx = 0; // initialization
+            do{
+                if((m_curLine = m_bufReader.readLine()) == null) return null;
+                // m_curLine := nextLine from file pointer
+                // m_curLine = kb.nextLine(); // dummy
+                m_lineLength = m_curLine.length(); // initialization
+                m_startIdx = 0; // initialization
+                m_endIdx = 0; // initialization
+            } while(m_lineLength <= 0);
         }
         m_endIdx = Scan(m_curLine, m_startIdx, m_endIdx);
         token = m_curLine.substring(m_startIdx, m_endIdx);
@@ -74,7 +92,7 @@ public static int Scan(String line, int startIdx, int endIdx){
     try {
         for(int i = startIdx; i < sizeOfLine; i++){
             curState = FindNextState(line.charAt(i), curState);
-            // System.out.println(String.format("0x%08X", curState));
+            System.out.println(String.format("0x%08X", curState));
             if(curState == DELIMITER) {
                 break;
             }
@@ -87,7 +105,7 @@ public static int Scan(String line, int startIdx, int endIdx){
 
         if (endIdx == sizeOfLine){
             if(FindNextState(' ', curState) != DELIMITER) {
-                // System.out.println(String.format("0x%08X", curState));
+                System.out.println(String.format("0x%08X", curState));
                 System.out.println(line.substring(startIdx, endIdx) + " is Rejected! 2");
                 System.exit(-1);
             }
