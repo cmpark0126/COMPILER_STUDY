@@ -13,8 +13,9 @@ private int m_startIdx = 0;
 private int m_endIdx = 0;
 private Scanner kb = null; // dummy
 
-private static final int DELIMITER = -1;
-private static final int ERROR = -2;
+private static final int DIVISOR = 0x100;
+private static final int DELIMITER = 0xff00; // rarely use state
+private static final int ERROR = 0xfe00;
 
 public static void main(String[] args) {
     try {
@@ -72,20 +73,22 @@ public static int Scan(String line, int startIdx, int endIdx){
     int curState = 0;
     try {
         for(int i = startIdx; i < sizeOfLine; i++){
-            curState = nextState(line.charAt(i), curState);
+            curState = FindNextState(line.charAt(i), curState);
+            System.out.println(String.format("0x%08X", curState));
             if(curState == DELIMITER) {
                 break;
             }
             else if(curState == ERROR) {
-                System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected!");
+                System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected! 1");
                 System.exit(-1);
             }
             endIdx++;
         }
 
         if (endIdx == sizeOfLine){
-            if(nextState(' ', curState) != DELIMITER) {
-                System.out.println(line.substring(startIdx, endIdx) + " is Rejected!");
+            if(FindNextState(' ', curState) != DELIMITER) {
+                System.out.println(String.format("0x%08X", curState));
+                System.out.println(line.substring(startIdx, endIdx) + " is Rejected! 2");
                 System.exit(-1);
             }
         }
@@ -99,82 +102,222 @@ public static int Scan(String line, int startIdx, int endIdx){
     return endIdx;
 }
 
-public static int nextState(char ch, int curState){
+public static int CalculateNextState(int groupState){
+    return groupState * DIVISOR;
+}
+
+public static int CalculateNextState(int curState, int nextLocalState){
+    return CalculateNextState(curState / DIVISOR) + nextLocalState;
+}
+
+public static int FindNextState(char ch, int curState){
     // we need to simplify the algorithm, and increase extencability
     // do not consider grammer issue
-    System.out.println("nextState(ch:char, curState:int):int");
     int nextState = 0;
     try {
-        switch (curState) { // Need to reduce redundancy
-            case 0: if(isLetter(ch)) nextState = 1;
-                    else if(ch == ';' || ch == ':' || ch == ',' || ch == ' ') nextState = 5;
-                    else if(ch == '=' || ch == '>' ||
-                            ch == '<' || ch == '*' ||
-                            ch == '/' || ch == '%') nextState = 2;
-                    else if(isDigit(ch)) nextState = 4;
-                    else if(ch == '(') nextState = 7;
-                    else if(ch == '\"') nextState = 9;
-                    else if(ch == '+' || ch == '-') nextState = 8;
-                    else nextState = ERROR;
-                    break;
-            case 1: if(isLetter(ch) || isDigit(ch)) nextState = 1;
-                    else if(ch == '.') nextState = 6;
-                    else if(ch == ' ' || ch == ';' || ch == ':' ||
-                            ch == ',' || ch == '=' ||
-                            ch == '>' || ch == '<' ||
-                            ch == '+' || ch == '-' ||
-                            ch == '*' || ch == '/' ||
-                            ch == '%' || ch == '(') nextState = DELIMITER;
-                    else nextState = ERROR;
-                    break;
-            case 2: if(ch == '=') nextState = 3;
-                    else if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMITER;
-                    else nextState = ERROR;
-                    break;
-            case 3: if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMITER;
-                    else nextState = ERROR;
-                    break;
-            case 4: if(isDigit(ch)) nextState = 4;
-                    else if(ch == ' ' || ch == ';' || ch == ':' ||
-                            ch == ',' || ch == '=' ||
-                            ch == '>' || ch == '<' ||
-                            ch == '+' || ch == '-' ||
-                            ch == '*' || ch == '/' ||
-                            ch == '%') nextState = DELIMITER;
-                    else nextState = ERROR;
-                    break;
-            case 5: nextState = DELIMITER;
-                    break;
-            case 6: if(isLetter(ch)) nextState = 1;
-                    else nextState = ERROR;
-                    break;
-            case 7: if(ch == ')') nextState = 5;
-                    else nextState = 7;
-                    break;
-            case 8: if(ch == '=') nextState = 3;
-                    if(ch == '+' || ch == '-') nextState = 5;
-                    else if(ch == ' ' || isLetter(ch) || isDigit(ch)) nextState = DELIMITER;
-                    else nextState = ERROR;
-                    break;
-            case 9: if(ch == '\"') nextState = 5;
-                    else nextState = 9;
-                    break;
+        switch (curState / DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(IsDigit(ch)) nextState = CalculateNextState(0x01);
+                       else if(IsLetter(ch)) nextState = CalculateNextState(0x02);
+                       else if(IsSpecialChar(ch)) nextState = CalculateNextState(0x03);
+                       else if(ch == '\"') nextState = CalculateNextState(0x04);
+                       else if(ch == '=') nextState = CalculateNextState(0x05);
+                       else if(ch == '>') nextState = CalculateNextState(0x06);
+                       else if(ch == '<') nextState = CalculateNextState(0x07);
+                       else if(ch == '+') nextState = CalculateNextState(0x08);
+                       else if(ch == '-') nextState = CalculateNextState(0x09);
+                       else if(ch == '*' || ch == '/' || ch == '%') nextState = CalculateNextState(0x0a);
+                       else nextState = ERROR;
+                       break;
+            case 0x01: nextState = DFAForNumber(ch, curState);
+                       break;
+            case 0x02: nextState = DFAForId(ch, curState);
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
-        System.out.println("Usage : nextState(ch:char, curState:int):int fault");
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
     }
 
     return nextState;
 }
 
-public static boolean isDigit(char ch){
+public static int DFAForNumber(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState % DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(IsDigit(ch)) nextState = curState;
+                       else if(ch == '.') nextState = CalculateNextState(curState, 0x01);
+                       else if(IsSpecialChar(ch) || IsOperatorOrSign(ch)) nextState = DELIMITER;
+                       break;
+            case 0x01: if(IsDigit(ch)) nextState = CalculateNextState(curState, 0x00);
+                       else nextState = ERROR;
+                       break;
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
+public static int DFAForId(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState % DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(IsLetter(ch) || IsDigit(ch)) nextState = curState;
+                       else if(ch == '.') nextState = CalculateNextState(curState, 0x01);
+                       else if(IsSpecialChar(ch) || IsOperatorOrSign(ch)) nextState = DELIMITER;
+                       break;
+            case 0x01: if(IsLetter(ch)) nextState = CalculateNextState(curState, 0x00);
+                       else nextState = ERROR;
+                       break;
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
+public static int DFAForSpecialChar(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState) { // Need to reduce redundancy
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
+public static int DFAForLiteral(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState) { // Need to reduce redundancy
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
+public static int DFAForStartWithEqualSign(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState) { // Need to reduce redundancy
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
+public static int DFAForStartWithGreaterThan(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState) { // Need to reduce redundancy
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
+public static int DFAForStartWithLessThan(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState) { // Need to reduce redundancy
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
+public static int DFAForStartWithPlusSign(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState) { // Need to reduce redundancy
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
+public static int DFAForStartWithMinusSign(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState) { // Need to reduce redundancy
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
+public static int DFAForStartWithOtherSign(char ch, int curState){
+    int nextState = 0;
+    try {
+        switch (curState) { // Need to reduce redundancy
+            default: nextState = ERROR;
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return nextState;
+}
+
+public static boolean IsDigit(char ch){
     return (ch >= 48 && ch <= 57)? true : false;
 }
 
-public static boolean isLetter(char ch){
+public static boolean IsLetter(char ch){
     return ((ch >= 65 && ch <= 90) ||
             (ch >= 97 && ch <= 122))? true : false;
+}
+
+public static boolean IsSpecialChar(char ch){
+    return (ch == '(' || ch == ')' ||
+            ch == '{' || ch == '}' ||
+            ch == ';' || ch == ':' ||
+            ch == ',' || ch == ' ' )? true : false;
+}
+
+public static boolean IsOperatorOrSign(char ch){
+    return (ch == '=' || ch == '>' ||
+            ch == '<' || ch == '+' ||
+            ch == '-' || ch == '*' ||
+            ch == '/' || ch == '%' )? true : false;
 }
 
 public static void AnalyzeToken(String token){
