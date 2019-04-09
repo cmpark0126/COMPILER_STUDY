@@ -27,7 +27,7 @@ public class MyScanner {
     private static final int SKIP = 0xff02;
     private static final int DELIMITER_FROM_DFA_OF_NUMBER = 0xff03;
     private static final int DELIMITER_FROM_DFA_OF_LITERAL = 0xff04;
-
+    private static final int DELIMITER_WITH_STARTING_ANNOTATION = 0xff05;
 
     public static void main(String[] args) {
         Scanner kb = new Scanner(System.in);
@@ -170,10 +170,12 @@ public class MyScanner {
                 }
                 info = Scan(m_curLine, m_startIdx, m_endIdx);
                 m_typeOfDelimiter = info.m_typeOfDelimiter;
-                if(m_typeOfDelimiter != SKIP) break;
-
-                m_endIdx = info.m_endIdx;
-                m_startIdx = m_endIdx;
+                if(m_typeOfDelimiter == SKIP) {
+                    m_endIdx = info.m_endIdx;
+                    m_startIdx = m_endIdx;
+                } else if (m_typeOfDelimiter == DELIMITER_WITH_STARTING_ANNOTATION){
+                    m_startIdx = m_lineLength;
+                } else break;
             }
 
             m_endIdx = info.m_endIdx;
@@ -251,8 +253,9 @@ public class MyScanner {
                            else if(ch == '<') nextState = CalculateNextState(0x07);
                            else if(ch == '+') nextState = CalculateNextState(0x08);
                            else if(ch == '-') nextState = CalculateNextState(0x09);
-                           else if(ch == '*' || ch == '/' || ch == '%') nextState = CalculateNextState(0x0a);
+                           else if(ch == '*' || ch == '%') nextState = CalculateNextState(0x0a);
                            else if(IsBlankChar(ch)) nextState = CalculateNextState(0x0b);
+                           else if(ch == '/') nextState = CalculateNextState(0x0c);
                            else nextState = ERROR;
                            break;
                 case 0x01: nextState = DFAForNumber(ch, curState);
@@ -276,6 +279,8 @@ public class MyScanner {
                 case 0x0a: nextState = DFAForStartWithOtherSign(ch, curState);
                            break;
                 case 0x0b: nextState = DFAForBlankAndTab(ch, curState);
+                           break;
+                case 0x0c: nextState = DFAForSlashChar(ch, curState);
                            break;
                 default: nextState = ERROR;
             }
@@ -491,6 +496,30 @@ public class MyScanner {
             switch (curState % DIVISOR) { // Need to reduce redundancy
                 case 0x00: if(IsBlankChar(ch)) nextState = curState;
                            else nextState = SKIP;
+                           break;
+                default: nextState = ERROR;
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+            System.exit(-1);
+        }
+        return nextState;
+    }
+
+    public static int DFAForSlashChar(char ch, int curState){
+        int nextState = 0;
+        try {
+            switch (curState % DIVISOR) { // Need to reduce redundancy
+                case 0x00: if(ch == '=') nextState = CalculateNextState(curState, 0x01);
+                           else if(ch == '/') nextState = CalculateNextState(curState, 0x02);
+                           else if(IsOperatorOrSign(ch)) nextState = ERROR;
+                           else nextState = DELIMITER;
+                           break;
+                case 0x01: if(IsOperatorOrSign(ch)) nextState = ERROR;
+                           else nextState = DELIMITER;
+                           break;
+                case 0x02: nextState = DELIMITER_WITH_STARTING_ANNOTATION;
                            break;
                 default: nextState = ERROR;
             }
