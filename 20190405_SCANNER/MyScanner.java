@@ -33,7 +33,8 @@ public static void main(String[] args) {
     String filename = "";
     File file = null;
     MyScanner scanner = null;
-    String token = "";
+    // String token = "";
+    InfoOfToken info = null;
 
     try {
         System.out.println("Sample running result is given below:");
@@ -43,8 +44,9 @@ public static void main(String[] args) {
         scanner = new MyScanner(file);
         // Need to open java script file
         while(true) {
-            token = scanner.Scan();
-            if(token == null) break;
+            info = scanner.Scan();
+            if(info == null) break;
+            scanner.AnalyzeToken(info.m_token, info.m_typeOfDelimiter);
         }
 
     } catch(Exception e) {
@@ -152,7 +154,7 @@ public boolean InitializeDelimiterMap(){
     return true;
 }
 
-public String Scan(){
+public InfoOfToken Scan(){
     InfoOfToken info = null;
     try {
         while(true){
@@ -175,10 +177,8 @@ public String Scan(){
         }
 
         m_endIdx = info.m_endIdx;
-        m_token = m_curLine.substring(m_startIdx, m_endIdx);
+        info.m_token = m_curLine.substring(m_startIdx, m_endIdx);
         m_startIdx = m_endIdx;
-
-        AnalyzeToken(m_token, m_typeOfDelimiter); // after every implementation, we need to check blank character;
 
     } catch(Exception e) {
         e.printStackTrace();
@@ -186,7 +186,7 @@ public String Scan(){
         System.exit(-1);
     }
 
-    return m_token;
+    return info;
 }
 
 public static InfoOfToken Scan(String line, int startIdx, int endIdx){
@@ -568,6 +568,7 @@ public void AnalyzeToken(String token, int typeOfDelimiter){
 class InfoOfToken {
     public int m_typeOfDelimiter = 0;
     public int m_endIdx = 0;
+    public String m_token = "";
 }
 
 class ScanLiteral {
