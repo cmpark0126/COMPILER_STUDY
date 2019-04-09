@@ -132,6 +132,8 @@ public static int FindNextState(char ch, int curState){
                        break;
             case 0x02: nextState = DFAForId(ch, curState);
                        break;
+            case 0x03: nextState = DFAForSpecialChar(ch, curState);
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -186,17 +188,7 @@ public static int DFAForId(char ch, int curState){
 }
 
 public static int DFAForSpecialChar(char ch, int curState){
-    int nextState = 0;
-    try {
-        switch (curState) { // Need to reduce redundancy
-            default: nextState = ERROR;
-        }
-    } catch(Exception e) {
-        e.printStackTrace();
-        System.out.println(e);
-        System.exit(-1);
-    }
-    return nextState;
+    return DELIMITER;
 }
 
 public static int DFAForLiteral(char ch, int curState){
