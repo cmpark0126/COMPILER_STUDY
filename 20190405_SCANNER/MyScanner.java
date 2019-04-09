@@ -21,6 +21,7 @@ public class MyScanner {
     private HashMap<Integer, String> m_delimiterMap = null;
 
     private static final int DIVISOR = 0x100;
+    private static final int LOOP_BREAKER = 0xff;
 
     private static final int ERROR = 0xff00; // rarely use group state
     private static final int DELIMITER = 0xff01;
@@ -199,7 +200,7 @@ public class MyScanner {
             for(int i = startIdx; i < sizeOfLine; i++){
                 curState = FindNextState(line.charAt(i), curState);
                 // System.out.println(String.format("0x%08X", curState));
-                if((curState / DIVISOR) == 0xff) { // special state case check
+                if((curState / DIVISOR) == LOOP_BREAKER) { // special state case check
                     if(curState == ERROR){
                         System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected! 1");
                         System.exit(-1);
@@ -210,7 +211,7 @@ public class MyScanner {
             }
 
             if (endIdx == sizeOfLine){
-                if(FindNextState(' ', curState) / DIVISOR != 0xff) {
+                if(FindNextState(' ', curState) / DIVISOR != LOOP_BREAKER) {
                     // System.out.println(String.format("0x%08X", curState));
                     System.out.println(line.substring(startIdx, endIdx) + " is Rejected! 2");
                     System.exit(-1);
