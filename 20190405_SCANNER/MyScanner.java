@@ -231,7 +231,7 @@ public static int FindNextState(char ch, int curState){
                        else if(ch == '+') nextState = CalculateNextState(0x08);
                        else if(ch == '-') nextState = CalculateNextState(0x09);
                        else if(ch == '*' || ch == '/' || ch == '%') nextState = CalculateNextState(0x0a);
-                       else if(ch == ' ' || ch == '\t') nextState = CalculateNextState(0x0b);
+                       else if(IsBlankChar(ch)) nextState = CalculateNextState(0x0b);
                        else nextState = ERROR;
                        break;
             case 0x01: nextState = DFAForNumber(ch, curState);
@@ -273,7 +273,7 @@ public static int DFAForNumber(char ch, int curState){
         switch (curState % DIVISOR) { // Need to reduce redundancy
             case 0x00: if(IsDigit(ch)) nextState = curState;
                        else if(ch == '.') nextState = CalculateNextState(curState, 0x01);
-                       else if(IsSpecialChar(ch) || IsOperatorOrSign(ch)) nextState = DELIMITER;
+                       else if(IsSpecialChar(ch) || IsOperatorOrSign(ch) || IsBlankChar(ch)) nextState = DELIMITER;
                        break;
             case 0x01: if(IsDigit(ch)) nextState = CalculateNextState(curState, 0x00);
                        else nextState = ERROR;
@@ -294,7 +294,7 @@ public static int DFAForId(char ch, int curState){
         switch (curState % DIVISOR) { // Need to reduce redundancy
             case 0x00: if(IsLetter(ch) || IsSpecialCharForId(ch) || IsDigit(ch) ) nextState = curState;
                        else if(ch == '.') nextState = CalculateNextState(curState, 0x01);
-                       else if(IsSpecialChar(ch) || IsOperatorOrSign(ch)) nextState = DELIMITER;
+                       else if(IsSpecialChar(ch) || IsOperatorOrSign(ch) || IsBlankChar(ch)) nextState = DELIMITER;
                        break;
             case 0x01: if(IsLetter(ch)) nextState = CalculateNextState(curState, 0x00);
                        else nextState = ERROR;
@@ -468,7 +468,7 @@ public static int DFAForBlankAndTab(char ch, int curState){
     int nextState = 0;
     try {
         switch (curState % DIVISOR) { // Need to reduce redundancy
-            case 0x00: if(ch == ' ' || ch == '\t') nextState = curState;
+            case 0x00: if(IsBlankChar(ch)) nextState = curState;
                        else nextState = SKIP;
                        break;
             default: nextState = ERROR;
@@ -506,6 +506,10 @@ public static boolean IsOperatorOrSign(char ch){
             ch == '<' || ch == '+' ||
             ch == '-' || ch == '*' ||
             ch == '/' || ch == '%' )? true : false;
+}
+
+public static boolean IsBlankChar(char ch){
+    return (ch == ' ' || ch == '\t')? true : false;
 }
 
 public void AnalyzeToken(String token){
