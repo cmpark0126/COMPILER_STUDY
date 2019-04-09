@@ -36,7 +36,7 @@ public class MyScanner {
         File file = null;
         MyScanner scanner = null;
         InfoOfToken info = null;
-        SimpleGrammerChecker sgc = null;
+        SimpleGrammarChecker sgc = null;
 
         try {
             System.out.println("Sample running result is given below:");
@@ -45,12 +45,12 @@ public class MyScanner {
 
             scanner = new MyScanner(file);
             // Need to open java script file
-            sgc = new SimpleGrammerChecker();
+            sgc = new SimpleGrammarChecker();
             while(true) {
                 // info = scanner.Scan();
                 // if(info == null) break;
                 // scanner.AnalyzeToken(info.m_token, info.m_typeOfDelimiter);
-                if(sgc.ScanWithGrammerChecker(scanner)) break;
+                if(sgc.ScanWithGrammarChecker(scanner)) break;
             }
 
         } catch(Exception e) {
@@ -243,7 +243,7 @@ public class MyScanner {
 
     public static int FindNextState(char ch, int curState){
         // we need to simplify the algorithm, and increase extencability
-        // do not consider grammer issue
+        // do not consider Grammar issue
         int nextState = 0;
         try {
             switch (curState / DIVISOR) { // Need to reduce redundancy
@@ -603,7 +603,7 @@ class InfoOfToken {
     public String m_token = "";
 }
 
-class SimpleGrammerChecker {
+class SimpleGrammarChecker {
     private ArrayList<InfoOfToken> m_arrayOfToken = null;
     private HashMap<String, Integer> m_tokenMap = null;
     private int m_curState = 0;
@@ -612,7 +612,7 @@ class SimpleGrammerChecker {
     private static final int DELIMITER_WITH_NEW_TOKEN = -2;
     private static final int ERROR = -3;
 
-    public SimpleGrammerChecker(){
+    public SimpleGrammarChecker(){
         try {
             m_arrayOfToken = new ArrayList<InfoOfToken>();
             m_tokenMap = new HashMap<>();
@@ -638,7 +638,7 @@ class SimpleGrammerChecker {
         return true;
     }
 
-    public boolean ScanWithGrammerChecker(MyScanner scanner){
+    public boolean ScanWithGrammarChecker(MyScanner scanner){
         InfoOfToken info = null;
         Integer mappedId = null;
         int curState = 0;
@@ -650,7 +650,7 @@ class SimpleGrammerChecker {
                 if(info == null) {isEnd = true; break;}
                 m_arrayOfToken.add(info);
 
-                // grammer check
+                // Grammar check
                 // System.out.println(info.m_token);
                 mappedId = m_tokenMap.get(info.m_token);
                 if(mappedId == null) mappedId = new Integer(0);
@@ -811,7 +811,7 @@ class ScanLiteral {
 
     public static int FindNextState(char ch, int curState){
         // we need to simplify the algorithm, and increase extencability
-        // do not consider grammer issue
+        // do not consider Grammar issue
         int nextState = 0;
         try {
             switch (curState) { // Need to reduce redundancy
