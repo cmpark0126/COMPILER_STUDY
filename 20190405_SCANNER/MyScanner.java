@@ -195,7 +195,7 @@ public static InfoOfToken Scan(String line, int startIdx, int endIdx){
         for(int i = startIdx; i < sizeOfLine; i++){
             curState = FindNextState(line.charAt(i), curState);
             // System.out.println(String.format("0x%08X", curState));
-            if((curState / 0x100) == 0xff) { // special state case check
+            if((curState / DIVISOR) == 0xff) { // special state case check
                 if(curState == ERROR){
                     System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected! 1");
                     System.exit(-1);
@@ -206,7 +206,7 @@ public static InfoOfToken Scan(String line, int startIdx, int endIdx){
         }
 
         if (endIdx == sizeOfLine){
-            if(FindNextState(' ', curState) != DELIMITER) {
+            if(FindNextState(' ', curState) / DIVISOR != 0xff) {
                 // System.out.println(String.format("0x%08X", curState));
                 System.out.println(line.substring(startIdx, endIdx) + " is Rejected! 2");
                 System.exit(-1);
@@ -533,7 +533,14 @@ public static boolean IsBlankChar(char ch){
 
 public void AnalyzeToken(String token, int typeOfDelimiter){
     String infoOfToken = "";
+    ScanLiteral scanner = null;
     try {
+        // Optional task
+        if(typeOfDelimiter == DELIMITER_FROM_DFA_OF_LITERAL){
+            scanner = new ScanLiteral(token);
+            if(scanner.Scan() == true) return;
+        }
+
         if ((infoOfToken = m_delimiterMap.get(typeOfDelimiter)) != null){
             System.out.println(token + " : " + infoOfToken);
         }
@@ -559,4 +566,145 @@ public void AnalyzeToken(String token, int typeOfDelimiter){
 class InfoOfToken {
     public int m_typeOfDelimiter = 0;
     public int m_endIdx = 0;
+}
+
+class ScanLiteral {
+    private String m_curLine = "";
+    private int m_lineLength = 0;
+    private int m_startIdx = 0;
+    private int m_endIdx = 0;
+    private int m_typeOfDelimiter = 0;
+    private String m_token = "";
+    private boolean m_isThereTag = false;
+
+    private static final int ERROR = -1;
+    private static final int DELIMITER_FROM_DFA_OF_TAG = -2;
+    private static final int DELIMITER_FROM_DFA_Without_TAG = -3;
+
+    public ScanLiteral(String line){
+        try {
+            m_curLine = line.substring(1, line.length() - 1);
+            m_lineLength = m_curLine.length();
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+            System.exit(-1);
+        }
+    }
+
+    public boolean Scan(){
+        InfoOfToken info = null;
+        try {
+            while(m_startIdx < m_lineLength){
+                info = Scan(m_curLine, m_startIdx, m_endIdx);
+                m_typeOfDelimiter = info.m_typeOfDelimiter;
+                m_endIdx = info.m_endIdx;
+
+                if(m_typeOfDelimiter == DELIMITER_FROM_DFA_OF_TAG) m_isThereTag = true;
+
+                // if((m_startIdx == 0) && m_endIdx == m_lineLength && m_typeOfDelimiter != DELIMITER_FROM_DFA_OF_TAG) {
+                //     return false;
+                // }
+
+                if(m_isThereTag == true && m_endIdx == m_lineLength && m_typeOfDelimiter != DELIMITER_FROM_DFA_OF_TAG) {
+                    m_typeOfDelimiter = DELIMITER_FROM_DFA_Without_TAG;
+                }
+
+                m_token = m_curLine.substring(m_startIdx, m_endIdx);
+                m_startIdx = m_endIdx;
+
+                AnalyzeToken(m_token, m_typeOfDelimiter);
+            }
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+            System.exit(-1);
+        }
+
+        return m_isThereTag;
+    }
+
+    public static InfoOfToken Scan(String line, int startIdx, int endIdx){
+        int sizeOfLine = line.length();
+        int curState = 0;
+        InfoOfToken info = null;
+        try {
+            for(int i = startIdx; i < sizeOfLine; i++){
+                curState = FindNextState(line.charAt(i), curState);
+                // System.out.println(curState);
+                if(curState == DELIMITER_FROM_DFA_OF_TAG ||
+                   curState == DELIMITER_FROM_DFA_Without_TAG) { // special state case check
+                    break;
+                } else if(curState == ERROR){
+                    System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected! 1");
+                    System.exit(-1);
+                }
+                endIdx++;
+            }
+
+            if (endIdx == sizeOfLine){
+                if((curState = FindNextState(' ', curState)) == ERROR) {
+                    // System.out.println(curState);
+                    System.out.println(line.substring(startIdx, endIdx) + " is Rejected! 2");
+                    System.exit(-1);
+                }
+            }
+
+            info = new InfoOfToken();
+            info.m_typeOfDelimiter = curState;
+            info.m_endIdx = endIdx;
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+            System.exit(-1);
+        }
+
+        return info;
+    }
+
+    public static int FindNextState(char ch, int curState){
+        // we need to simplify the algorithm, and increase extencability
+        // do not consider grammer issue
+        int nextState = 0;
+        try {
+            switch (curState) { // Need to reduce redundancy
+                case 0: if(ch == '<') nextState = 2;
+                        else nextState = 1;
+                        break;
+                case 1: if(ch == '<') nextState = DELIMITER_FROM_DFA_Without_TAG;
+                        else nextState = curState;
+                        break;
+                case 2: if(ch == '>') nextState = 3;
+                        else nextState = curState;
+                        break;
+                case 3: nextState = DELIMITER_FROM_DFA_OF_TAG;
+                        break;
+                default: nextState = ERROR;
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+            System.exit(-1);
+        }
+
+        return nextState;
+    }
+
+    public void AnalyzeToken(String token, int typeOfDelimiter){
+        try {
+            if (typeOfDelimiter == DELIMITER_FROM_DFA_OF_TAG)
+                System.out.println(token + " : " + "Tag");
+            else if(typeOfDelimiter == DELIMITER_FROM_DFA_Without_TAG)
+                System.out.println("\"" + token + "\"" + " : " + "between or behind the Tag");
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+            System.exit(-1);
+        }
+
+        return;
+    }
+
 }
