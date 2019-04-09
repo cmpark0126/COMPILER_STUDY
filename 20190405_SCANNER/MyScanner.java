@@ -5,7 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-
+import java.util.Iterator;
+import java.util.Map;
 
 public class MyScanner {
 private BufferedReader m_bufReader = null;
@@ -14,13 +15,16 @@ private int m_lineLength = 0;
 private int m_startIdx = 0;
 private int m_endIdx = 0;
 private int m_typeOfDelimiter = 0;
+private String m_token = "";
 HashMap<String, String> m_reservedSymbolMap = null;
+HashMap<Integer, String> m_delimiterMap = null;
 
 private static final int DIVISOR = 0x100;
 
 private static final int ERROR = 0xff00; // rarely use group state
 private static final int DELIMITER = 0xff01;
 private static final int SKIP = 0xff02;
+private static final int DELIMITER_FROM_DFA_OF_LITERAL = 0xff03;
 
 
 public static void main(String[] args) {
@@ -57,6 +61,7 @@ public MyScanner(File file){
         fileReader = new FileReader(file);
         this.m_bufReader = new BufferedReader(fileReader);
         InitializeReservedSymbolMap();
+        InitializeDelimiterMap();
     } catch(Exception e) {
         e.printStackTrace();
         System.out.println(e);
@@ -130,9 +135,23 @@ public boolean InitializeReservedSymbolMap(){
     return true;
 }
 
+public boolean InitializeDelimiterMap(){
+    try {
+        m_delimiterMap = new HashMap<>();
+
+        // resulved symbol
+        m_delimiterMap.put(DELIMITER_FROM_DFA_OF_LITERAL,"literal");
+
+    } catch(Exception e) {
+        e.printStackTrace();
+        System.out.println(e);
+        System.exit(-1);
+    }
+    return true;
+}
+
 public String Scan(){
     InfoOfToken info = null;
-    String token = null;
     try {
         while(true){
             // System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
@@ -154,10 +173,10 @@ public String Scan(){
         }
 
         m_endIdx = info.m_endIdx;
-        token = m_curLine.substring(m_startIdx, m_endIdx);
+        m_token = m_curLine.substring(m_startIdx, m_endIdx);
         m_startIdx = m_endIdx;
 
-        AnalyzeToken(token); // after every implementation, we need to check blank character;
+        AnalyzeToken(m_token, m_typeOfDelimiter); // after every implementation, we need to check blank character;
 
     } catch(Exception e) {
         e.printStackTrace();
@@ -165,7 +184,7 @@ public String Scan(){
         System.exit(-1);
     }
 
-    return token;
+    return m_token;
 }
 
 public static InfoOfToken Scan(String line, int startIdx, int endIdx){
@@ -320,7 +339,7 @@ public static int DFAForLiteral(char ch, int curState){
             case 0x00: if(ch == '\"') nextState = CalculateNextState(curState, 0x01);
                        else nextState = curState;
                        break;
-            case 0x01: nextState = DELIMITER;
+            case 0x01: nextState = DELIMITER_FROM_DFA_OF_LITERAL;
                        break;
             default: nextState = ERROR;
         }
@@ -512,15 +531,20 @@ public static boolean IsBlankChar(char ch){
     return (ch == ' ' || ch == '\t')? true : false;
 }
 
-public void AnalyzeToken(String token){
+public void AnalyzeToken(String token, int typeOfDelimiter){
     String infoOfToken = "";
     try {
-        infoOfToken = m_reservedSymbolMap.get(token);
-        if(infoOfToken != null) System.out.println(token + "\t" + infoOfToken);
-        else {
-            m_reservedSymbolMap.put(token,"user-defined id");
-            System.out.println(token + "\t" + m_reservedSymbolMap.get(token));
+        if ((infoOfToken = m_delimiterMap.get(typeOfDelimiter)) != null){
+            System.out.println(token + " : " + infoOfToken);
         }
+        else {
+            if((infoOfToken = infoOfToken = m_reservedSymbolMap.get(token)) != null) System.out.println(token + " : " + infoOfToken);
+            else {
+                m_reservedSymbolMap.put(token,"user-defined id");
+                System.out.println(token + " : " + m_reservedSymbolMap.get(token));
+            }
+        }
+
     } catch(Exception e) {
         e.printStackTrace();
         System.out.println(e);
