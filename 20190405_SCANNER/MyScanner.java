@@ -134,6 +134,8 @@ public static int FindNextState(char ch, int curState){
                        break;
             case 0x03: nextState = DFAForSpecialChar(ch, curState);
                        break;
+            case 0x04: nextState = DFAForLiteral(ch, curState);
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -194,7 +196,12 @@ public static int DFAForSpecialChar(char ch, int curState){
 public static int DFAForLiteral(char ch, int curState){
     int nextState = 0;
     try {
-        switch (curState) { // Need to reduce redundancy
+        switch (curState % DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(ch == '\"') nextState = CalculateNextState(curState, 0x01);
+                       else nextState = curState;
+                       break;
+            case 0x01: nextState = DELIMITER;
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -208,7 +215,7 @@ public static int DFAForLiteral(char ch, int curState){
 public static int DFAForStartWithEqualSign(char ch, int curState){
     int nextState = 0;
     try {
-        switch (curState) { // Need to reduce redundancy
+        switch (curState % DIVISOR) { // Need to reduce redundancy
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -222,7 +229,7 @@ public static int DFAForStartWithEqualSign(char ch, int curState){
 public static int DFAForStartWithGreaterThan(char ch, int curState){
     int nextState = 0;
     try {
-        switch (curState) { // Need to reduce redundancy
+        switch (curState % DIVISOR) { // Need to reduce redundancy
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -236,7 +243,7 @@ public static int DFAForStartWithGreaterThan(char ch, int curState){
 public static int DFAForStartWithLessThan(char ch, int curState){
     int nextState = 0;
     try {
-        switch (curState) { // Need to reduce redundancy
+        switch (curState % DIVISOR) { // Need to reduce redundancy
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -250,7 +257,7 @@ public static int DFAForStartWithLessThan(char ch, int curState){
 public static int DFAForStartWithPlusSign(char ch, int curState){
     int nextState = 0;
     try {
-        switch (curState) { // Need to reduce redundancy
+        switch (curState % DIVISOR) { // Need to reduce redundancy
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -264,7 +271,7 @@ public static int DFAForStartWithPlusSign(char ch, int curState){
 public static int DFAForStartWithMinusSign(char ch, int curState){
     int nextState = 0;
     try {
-        switch (curState) { // Need to reduce redundancy
+        switch (curState % DIVISOR) { // Need to reduce redundancy
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -278,7 +285,7 @@ public static int DFAForStartWithMinusSign(char ch, int curState){
 public static int DFAForStartWithOtherSign(char ch, int curState){
     int nextState = 0;
     try {
-        switch (curState) { // Need to reduce redundancy
+        switch (curState % DIVISOR) { // Need to reduce redundancy
             default: nextState = ERROR;
         }
     } catch(Exception e) {
