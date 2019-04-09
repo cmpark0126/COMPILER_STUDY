@@ -61,22 +61,27 @@ public MyScanner(File file){
 public String Scan(){
     String token = null;
     try {
-        // System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
-        if (m_startIdx >= m_lineLength){
-            do{
-                if((m_curLine = m_bufReader.readLine()) == null) return null;
-                // m_curLine := nextLine from file pointer
-                // m_curLine = kb.nextLine(); // dummy
-                m_lineLength = m_curLine.length(); // initialization
-                m_startIdx = 0; // initialization
-                m_endIdx = 0; // initialization
-            } while(m_lineLength <= 0);
+        while(true){
+            // System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
+            if (m_startIdx >= m_lineLength){
+                do{
+                    if((m_curLine = m_bufReader.readLine()) == null) return null;
+                    // m_curLine := nextLine from file pointer
+                    // m_curLine = kb.nextLine(); // dummy
+                    m_lineLength = m_curLine.length(); // initialization
+                    m_startIdx = 0; // initialization
+                    m_endIdx = 0; // initialization
+                } while(m_lineLength <= 0);
+            }
+            m_endIdx = Scan(m_curLine, m_startIdx, m_endIdx);
+            token = m_curLine.substring(m_startIdx, m_endIdx);
+            m_startIdx = m_endIdx;
+
+            if(token.charAt(0) != ' ') break;
         }
-        m_endIdx = Scan(m_curLine, m_startIdx, m_endIdx);
-        token = m_curLine.substring(m_startIdx, m_endIdx);
+
         AnalyzeToken(token); // after every implementation, we need to check blank character;
 
-        m_startIdx = m_endIdx;
     } catch(Exception e) {
         e.printStackTrace();
         System.out.println(e);
@@ -92,7 +97,7 @@ public static int Scan(String line, int startIdx, int endIdx){
     try {
         for(int i = startIdx; i < sizeOfLine; i++){
             curState = FindNextState(line.charAt(i), curState);
-            System.out.println(String.format("0x%08X", curState));
+            // System.out.println(String.format("0x%08X", curState));
             if(curState == DELIMITER) {
                 break;
             }
@@ -105,7 +110,7 @@ public static int Scan(String line, int startIdx, int endIdx){
 
         if (endIdx == sizeOfLine){
             if(FindNextState(' ', curState) != DELIMITER) {
-                System.out.println(String.format("0x%08X", curState));
+                // System.out.println(String.format("0x%08X", curState));
                 System.out.println(line.substring(startIdx, endIdx) + " is Rejected! 2");
                 System.exit(-1);
             }
