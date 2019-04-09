@@ -136,6 +136,18 @@ public static int FindNextState(char ch, int curState){
                        break;
             case 0x04: nextState = DFAForLiteral(ch, curState);
                        break;
+            case 0x05: nextState = DFAForStartWithEqualSign(ch, curState);
+                       break;
+            case 0x06: nextState = DFAForStartWithGreaterThan(ch, curState);
+                       break;
+            case 0x07: nextState = DFAForStartWithLessThan(ch, curState);
+                       break;
+            case 0x08: nextState = DFAForStartWithPlusSign(ch, curState);
+                       break;
+            case 0x09: nextState = DFAForStartWithMinusSign(ch, curState);
+                       break;
+            case 0x0a: nextState = DFAForStartWithOtherSign(ch, curState);
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -216,6 +228,13 @@ public static int DFAForStartWithEqualSign(char ch, int curState){
     int nextState = 0;
     try {
         switch (curState % DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(ch == '=') nextState = CalculateNextState(curState, 0x01);
+                       else if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
+            case 0x01: if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
@@ -230,6 +249,18 @@ public static int DFAForStartWithGreaterThan(char ch, int curState){
     int nextState = 0;
     try {
         switch (curState % DIVISOR) { // Need to reduce redundancy
+            case 0x00: if(ch == '=') nextState = CalculateNextState(curState, 0x01);
+                       else if(ch == '>') nextState = CalculateNextState(curState, 0x02);
+                       else if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
+            case 0x01: if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
+            case 0x02: if(ch == '>') nextState = CalculateNextState(curState, 0x01);
+                       else if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
+                       break;
             default: nextState = ERROR;
         }
     } catch(Exception e) {
