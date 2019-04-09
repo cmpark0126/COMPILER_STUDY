@@ -103,36 +103,36 @@ public class MyScanner {
             m_reservedSymbolMap.put("return","keyword");
 
             // special character
-            m_reservedSymbolMap.put("(","character");
-            m_reservedSymbolMap.put(")","character");
-            m_reservedSymbolMap.put("{","character");
-            m_reservedSymbolMap.put("}","character");
-            m_reservedSymbolMap.put(";","character");
-            m_reservedSymbolMap.put(":","character");
-            m_reservedSymbolMap.put(",","character");
+            m_reservedSymbolMap.put("(","left parentheses character");
+            m_reservedSymbolMap.put(")","right parentheses character");
+            m_reservedSymbolMap.put("{","left brace character");
+            m_reservedSymbolMap.put("}","right brace character");
+            m_reservedSymbolMap.put(";","semi colon character");
+            m_reservedSymbolMap.put(":","colon character");
+            m_reservedSymbolMap.put(",","punctuation character");
 
             // operator and sign
-            m_reservedSymbolMap.put("=","operator");
-            m_reservedSymbolMap.put("==","operator");
-            m_reservedSymbolMap.put(">","operator");
-            m_reservedSymbolMap.put(">=","operator");
-            m_reservedSymbolMap.put(">>","operator");
+            m_reservedSymbolMap.put("=","Assignment operator");
+            m_reservedSymbolMap.put("==","equal to");
+            m_reservedSymbolMap.put(">","greater than");
+            m_reservedSymbolMap.put(">=","greater than or equal to");
+            m_reservedSymbolMap.put(">>","Right shift");
             m_reservedSymbolMap.put(">>>","operator");
-            m_reservedSymbolMap.put("<","operator");
-            m_reservedSymbolMap.put("<=","operator");
-            m_reservedSymbolMap.put("<<","operator");
-            m_reservedSymbolMap.put("+","operator");
-            m_reservedSymbolMap.put("+=","operator");
-            m_reservedSymbolMap.put("++","operator");
-            m_reservedSymbolMap.put("-","operator");
-            m_reservedSymbolMap.put("-=","operator");
-            m_reservedSymbolMap.put("--","operator");
-            m_reservedSymbolMap.put("*","operator");
-            m_reservedSymbolMap.put("*=","operator");
-            m_reservedSymbolMap.put("/","operator");
-            m_reservedSymbolMap.put("/=","operator");
-            m_reservedSymbolMap.put("%","operator");
-            m_reservedSymbolMap.put("%=","operator");
+            m_reservedSymbolMap.put("<","less than");
+            m_reservedSymbolMap.put("<=","less than or equal to");
+            m_reservedSymbolMap.put("<<","Left shift");
+            m_reservedSymbolMap.put("+","Addition operator");
+            m_reservedSymbolMap.put("+=","Addition Assignment operator");
+            m_reservedSymbolMap.put("++","Increment operator");
+            m_reservedSymbolMap.put("-","Subtraction operator");
+            m_reservedSymbolMap.put("-=","SubtractionAssignment operator");
+            m_reservedSymbolMap.put("--","Decrement operator");
+            m_reservedSymbolMap.put("*","Multiplication operator");
+            m_reservedSymbolMap.put("*=","Multiplication Assignment operator");
+            m_reservedSymbolMap.put("/","Division operator");
+            m_reservedSymbolMap.put("/=","Division Assignment operator");
+            m_reservedSymbolMap.put("%","Modulus operator");
+            m_reservedSymbolMap.put("%=","Modulus Assignment operator");
 
         } catch(Exception e) {
             e.printStackTrace();
@@ -146,6 +146,7 @@ public class MyScanner {
         try {
             m_delimiterMap.put(DELIMITER_FROM_DFA_OF_NUMBER,"number");
             m_delimiterMap.put(DELIMITER_FROM_DFA_OF_LITERAL,"literal");
+            m_delimiterMap.put(DELIMITER_WITH_STARTING_ANNOTATION,"comment");
 
         } catch(Exception e) {
             e.printStackTrace();
@@ -175,7 +176,8 @@ public class MyScanner {
                     m_endIdx = info.m_endIdx;
                     m_startIdx = m_endIdx;
                 } else if (m_typeOfDelimiter == DELIMITER_WITH_STARTING_ANNOTATION){
-                    m_startIdx = m_lineLength;
+                    info.m_endIdx = m_lineLength;
+                    break;
                 } else break;
             }
 
