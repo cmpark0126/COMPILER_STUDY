@@ -74,7 +74,7 @@ public static int Scan(String line, int startIdx, int endIdx){
     try {
         for(int i = startIdx; i < sizeOfLine; i++){
             curState = FindNextState(line.charAt(i), curState);
-            System.out.println(String.format("0x%08X", curState));
+            // System.out.println(String.format("0x%08X", curState));
             if(curState == DELIMITER) {
                 break;
             }
@@ -87,7 +87,7 @@ public static int Scan(String line, int startIdx, int endIdx){
 
         if (endIdx == sizeOfLine){
             if(FindNextState(' ', curState) != DELIMITER) {
-                System.out.println(String.format("0x%08X", curState));
+                // System.out.println(String.format("0x%08X", curState));
                 System.out.println(line.substring(startIdx, endIdx) + " is Rejected! 2");
                 System.exit(-1);
             }
@@ -277,20 +277,11 @@ public static int DFAForStartWithLessThan(char ch, int curState){
         switch (curState % DIVISOR) { // Need to reduce redundancy
             case 0x00: if(ch == '=') nextState = CalculateNextState(curState, 0x01);
                        else if(ch == '<') nextState = CalculateNextState(curState, 0x01);
-                       else if(IsLetter(ch)) nextState = CalculateNextState(curState, 0x02);
-                       else if(ch == '/') nextState = CalculateNextState(curState, 0x03);
+                       else if(IsOperatorOrSign(ch)) nextState = ERROR;
+                       else nextState = DELIMITER;
                        break;
             case 0x01: if(IsOperatorOrSign(ch)) nextState = ERROR;
                        else nextState = DELIMITER;
-                       break;
-            case 0x02: if(ch == '>') nextState = CalculateNextState(curState, 0x04);
-                       else if(IsLetter(ch) || IsSpecialCharForId(ch) || IsDigit(ch)) nextState = curState;
-                       else nextState = DELIMITER;
-                       break;
-            case 0x03: if(IsLetter(ch)) nextState = CalculateNextState(curState, 0x02);
-                       else nextState = ERROR;
-                       break;
-            case 0x04: nextState = DELIMITER;
                        break;
             default: nextState = ERROR;
         }
