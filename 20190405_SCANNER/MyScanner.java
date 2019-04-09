@@ -842,7 +842,7 @@ class ScanLiteral {
             if (typeOfDelimiter == DELIMITER_FROM_DFA_OF_TAG)
                 System.out.println(token + " : " + "Tag");
             else if(typeOfDelimiter == DELIMITER_FROM_DFA_Without_TAG)
-                System.out.println("\"" + token + "\"" + " : " + "between or behind the Tag");
+                System.out.println("\"" + token + "\"" + " : " + "between or around the Tag");
         } catch(Exception e) {
             e.printStackTrace();
             System.out.println(e);
