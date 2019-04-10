@@ -158,7 +158,7 @@ public class MyScanner {
 
     public InfoOfToken Scan(){
         InfoOfToken info = null;
-        boolean isStartToken = true;
+        int specialState = 0x01;
         try {
             while(true){
                 // System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
@@ -170,9 +170,9 @@ public class MyScanner {
                         m_startIdx = 0; // initialization
                         m_endIdx = 0; // initialization
                     } while(m_lineLength <= 0);
-                    isStartToken = true;
+                    specialState = 0x01;
                 }
-                info = Scan(m_curLine, m_startIdx, m_endIdx, isStartToken);
+                info = Scan(m_curLine, m_startIdx, m_endIdx, specialState);
                 m_typeOfDelimiter = info.m_typeOfDelimiter;
                 if(m_typeOfDelimiter == SKIP) {
                     m_endIdx = info.m_endIdx;
@@ -182,7 +182,7 @@ public class MyScanner {
                     break;
                 } else break;
             }
-            isStartToken = false;
+            specialState = 0x00;
 
             m_endIdx = info.m_endIdx;
             info.m_token = m_curLine.substring(m_startIdx, m_endIdx);
@@ -197,14 +197,14 @@ public class MyScanner {
         return info;
     }
 
-    public InfoOfToken Scan(String line, int startIdx, int endIdx, boolean isStartToken){
+    public InfoOfToken Scan(String line, int startIdx, int endIdx, int specialState){
         int sizeOfLine = line.length();
         int curState = 0;
         InfoOfToken info = null;
         try {
             // realize this now analyzing token is first token in line;
             // for <script_start> <script_end>
-            if (isStartToken) curState = CalculateNextState(curState, 0x01);
+            curState = CalculateNextState(curState, specialState);
 
             for(int i = startIdx; i < sizeOfLine; i++){
                 curState = FindNextState(line.charAt(i), curState);
