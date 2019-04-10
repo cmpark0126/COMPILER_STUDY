@@ -47,10 +47,10 @@ public class MyScanner {
             // Need to open java script file
             sgc = new SimpleGrammarChecker();
             while(true) {
-                // info = scanner.Scan();
-                // if(info == null) break;
-                // scanner.AnalyzeToken(info.m_token, info.m_typeOfDelimiter);
-                if(sgc.ScanWithGrammarChecker(scanner)) break;
+                info = scanner.Scan();
+                if(info == null) break;
+                scanner.AnalyzeToken(info.m_token, info.m_typeOfDelimiter);
+                // if(sgc.ScanWithGrammarChecker(scanner)) break;
             }
 
         } catch(Exception e) {
@@ -158,6 +158,7 @@ public class MyScanner {
 
     public InfoOfToken Scan(){
         InfoOfToken info = null;
+        boolean isStartToken = true;
         try {
             while(true){
                 // System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
@@ -169,8 +170,9 @@ public class MyScanner {
                         m_startIdx = 0; // initialization
                         m_endIdx = 0; // initialization
                     } while(m_lineLength <= 0);
+                    isStartToken = true;
                 }
-                info = Scan(m_curLine, m_startIdx, m_endIdx);
+                info = Scan(m_curLine, m_startIdx, m_endIdx, isStartToken);
                 m_typeOfDelimiter = info.m_typeOfDelimiter;
                 if(m_typeOfDelimiter == SKIP) {
                     m_endIdx = info.m_endIdx;
@@ -180,6 +182,7 @@ public class MyScanner {
                     break;
                 } else break;
             }
+            isStartToken = false;
 
             m_endIdx = info.m_endIdx;
             info.m_token = m_curLine.substring(m_startIdx, m_endIdx);
@@ -194,11 +197,15 @@ public class MyScanner {
         return info;
     }
 
-    public static InfoOfToken Scan(String line, int startIdx, int endIdx){
+    public InfoOfToken Scan(String line, int startIdx, int endIdx, boolean isStartToken){
         int sizeOfLine = line.length();
         int curState = 0;
         InfoOfToken info = null;
         try {
+            // realize this now analyzing token is first token in line;
+            // for <script_start> <script_end>
+            if (isStartToken) curState = CalculateNextState(curState, 0x01);
+
             for(int i = startIdx; i < sizeOfLine; i++){
                 curState = FindNextState(line.charAt(i), curState);
                 // System.out.println(String.format("0x%08X", curState));
@@ -253,7 +260,10 @@ public class MyScanner {
                            else if(ch == '\"') nextState = CalculateNextState(0x04);
                            else if(ch == '=') nextState = CalculateNextState(0x05);
                            else if(ch == '>') nextState = CalculateNextState(0x06);
-                           else if(ch == '<') nextState = CalculateNextState(0x07);
+                           else if(ch == '<') {
+                               if((curState % DIVISOR) == 0x00) nextState = CalculateNextState(0x07);
+                               if((curState % DIVISOR) == 0x01) nextState = CalculateNextState(0x0d);
+                           }
                            else if(ch == '+') nextState = CalculateNextState(0x08);
                            else if(ch == '-') nextState = CalculateNextState(0x09);
                            else if(ch == '*' || ch == '%') nextState = CalculateNextState(0x0a);
@@ -284,6 +294,8 @@ public class MyScanner {
                 case 0x0b: nextState = DFAForBlankAndTab(ch, curState);
                            break;
                 case 0x0c: nextState = DFAForSlashChar(ch, curState);
+                           break;
+                case 0x0d: nextState = DFAForSpecialKeywordForRecognizingScriptCode(ch, curState);
                            break;
                 default: nextState = ERROR;
             }
@@ -534,6 +546,26 @@ public class MyScanner {
         return nextState;
     }
 
+
+    public static int DFAForSpecialKeywordForRecognizingScriptCode(char ch, int curState){
+        int nextState = 0;
+        try {
+            switch (curState % DIVISOR) { // Need to reduce redundancy
+                case 0x00: if(IsLetter(ch) || IsSpecialCharForId(ch)) nextState = curState;
+                           else if(ch == '>') nextState = CalculateNextState(curState, 0x01);
+                           break;
+                case 0x01: nextState = DELIMITER;
+                           break;
+                default: nextState = ERROR;
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+            System.exit(-1);
+        }
+        return nextState;
+    }
+
     public static boolean IsDigit(char ch){
         return (ch >= 48 && ch <= 57)? true : false;
     }
@@ -603,115 +635,115 @@ class InfoOfToken {
     public String m_token = "";
 }
 
-class SimpleGrammarChecker {
-    private ArrayList<InfoOfToken> m_arrayOfToken = null;
-    private HashMap<String, Integer> m_tokenMap = null;
-    private int m_curState = 0;
-
-    private static final int DELIMITER = -1;
-    private static final int DELIMITER_WITH_NEW_TOKEN = -2;
-    private static final int ERROR = -3;
-
-    public SimpleGrammarChecker(){
-        try {
-            m_arrayOfToken = new ArrayList<InfoOfToken>();
-            m_tokenMap = new HashMap<>();
-            InitializeTokenMap();
-        } catch(Exception e) {
-            e.printStackTrace();
-            System.out.println(e);
-            System.exit(-1);
-        }
-    }
-
-    public boolean InitializeTokenMap(){
-        try {
-            m_tokenMap.put("<", 1);
-            m_tokenMap.put("/", 2);
-            m_tokenMap.put(">", 3);
-
-        } catch(Exception e) {
-            e.printStackTrace();
-            System.out.println(e);
-            System.exit(-1);
-        }
-        return true;
-    }
-
-    public boolean ScanWithGrammarChecker(MyScanner scanner){
-        InfoOfToken info = null;
-        Integer mappedId = null;
-        int curState = 0;
-        StringBuffer sb = null;
-        boolean isEnd = false;
-        try {
-            while(true) {
-                info = scanner.Scan();
-                if(info == null) {isEnd = true; break;}
-                m_arrayOfToken.add(info);
-
-                // Grammar check
-                // System.out.println(info.m_token);
-                mappedId = m_tokenMap.get(info.m_token);
-                if(mappedId == null) mappedId = new Integer(0);
-                // System.out.println(mappedId.intValue());
-                m_curState = FindNextState(mappedId.intValue(), m_curState);
-                // System.out.println(m_curState);
-
-                if(m_curState == DELIMITER || m_curState == DELIMITER_WITH_NEW_TOKEN) break;
-                else if(m_curState == ERROR) {
-                    System.out.println("error");
-                    System.exit(-1);
-                }
-            }
-            // System.out.println("============");
-
-            if(m_curState == DELIMITER || isEnd == true) {
-                for(InfoOfToken subInfo: m_arrayOfToken){
-                    scanner.AnalyzeToken(subInfo.m_token, subInfo.m_typeOfDelimiter);
-                }
-            } else if(m_curState == DELIMITER_WITH_NEW_TOKEN) {
-                sb = new StringBuffer();
-                for(InfoOfToken subInfo: m_arrayOfToken){
-                    sb.append(subInfo.m_token);
-                }
-                scanner.AnalyzeToken(sb.toString(), 0xff00);
-            }
-
-            m_arrayOfToken.clear();
-            m_curState = 0;
-
-        } catch(Exception e) {
-            e.printStackTrace();
-            System.out.println(e);
-            System.exit(-1);
-        }
-        return isEnd;
-    }
-
-    public int FindNextState(int mappedId, int curState){
-        int nextState = 0;
-        try {
-            switch(curState){
-                case 0: if(mappedId == 1) nextState = 1;
-                        else nextState = DELIMITER;
-                        break;
-                case 1: if(mappedId == 0) nextState = 2;
-                        else nextState = DELIMITER;
-                        break;
-                case 2: if(mappedId == 3) nextState = DELIMITER_WITH_NEW_TOKEN;
-                        else nextState = DELIMITER;
-                        break;
-                default: nextState = ERROR;
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-            System.out.println(e);
-            System.exit(-1);
-        }
-        return nextState;
-    }
-}
+// class SimpleGrammarChecker {
+//     private ArrayList<InfoOfToken> m_arrayOfToken = null;
+//     private HashMap<String, Integer> m_tokenMap = null;
+//     private int m_curState = 0;
+//
+//     private static final int DELIMITER = -1;
+//     private static final int DELIMITER_WITH_NEW_TOKEN = -2;
+//     private static final int ERROR = -3;
+//
+//     public SimpleGrammarChecker(){
+//         try {
+//             m_arrayOfToken = new ArrayList<InfoOfToken>();
+//             m_tokenMap = new HashMap<>();
+//             InitializeTokenMap();
+//         } catch(Exception e) {
+//             e.printStackTrace();
+//             System.out.println(e);
+//             System.exit(-1);
+//         }
+//     }
+//
+//     public boolean InitializeTokenMap(){
+//         try {
+//             m_tokenMap.put("<", 1);
+//             m_tokenMap.put("/", 2);
+//             m_tokenMap.put(">", 3);
+//
+//         } catch(Exception e) {
+//             e.printStackTrace();
+//             System.out.println(e);
+//             System.exit(-1);
+//         }
+//         return true;
+//     }
+//
+//     public boolean ScanWithGrammarChecker(MyScanner scanner){
+//         InfoOfToken info = null;
+//         Integer mappedId = null;
+//         int curState = 0;
+//         StringBuffer sb = null;
+//         boolean isEnd = false;
+//         try {
+//             while(true) {
+//                 info = scanner.Scan();
+//                 if(info == null) {isEnd = true; break;}
+//                 m_arrayOfToken.add(info);
+//
+//                 // Grammar check
+//                 // System.out.println(info.m_token);
+//                 mappedId = m_tokenMap.get(info.m_token);
+//                 if(mappedId == null) mappedId = new Integer(0);
+//                 // System.out.println(mappedId.intValue());
+//                 m_curState = FindNextState(mappedId.intValue(), m_curState);
+//                 // System.out.println(m_curState);
+//
+//                 if(m_curState == DELIMITER || m_curState == DELIMITER_WITH_NEW_TOKEN) break;
+//                 else if(m_curState == ERROR) {
+//                     System.out.println("error");
+//                     System.exit(-1);
+//                 }
+//             }
+//             // System.out.println("============");
+//
+//             if(m_curState == DELIMITER || isEnd == true) {
+//                 for(InfoOfToken subInfo: m_arrayOfToken){
+//                     scanner.AnalyzeToken(subInfo.m_token, subInfo.m_typeOfDelimiter);
+//                 }
+//             } else if(m_curState == DELIMITER_WITH_NEW_TOKEN) {
+//                 sb = new StringBuffer();
+//                 for(InfoOfToken subInfo: m_arrayOfToken){
+//                     sb.append(subInfo.m_token);
+//                 }
+//                 scanner.AnalyzeToken(sb.toString(), 0xff00);
+//             }
+//
+//             m_arrayOfToken.clear();
+//             m_curState = 0;
+//
+//         } catch(Exception e) {
+//             e.printStackTrace();
+//             System.out.println(e);
+//             System.exit(-1);
+//         }
+//         return isEnd;
+//     }
+//
+//     public int FindNextState(int mappedId, int curState){
+//         int nextState = 0;
+//         try {
+//             switch(curState){
+//                 case 0: if(mappedId == 1) nextState = 1;
+//                         else nextState = DELIMITER;
+//                         break;
+//                 case 1: if(mappedId == 0) nextState = 2;
+//                         else nextState = DELIMITER;
+//                         break;
+//                 case 2: if(mappedId == 3) nextState = DELIMITER_WITH_NEW_TOKEN;
+//                         else nextState = DELIMITER;
+//                         break;
+//                 default: nextState = ERROR;
+//             }
+//         } catch(Exception e) {
+//             e.printStackTrace();
+//             System.out.println(e);
+//             System.exit(-1);
+//         }
+//         return nextState;
+//     }
+// }
 
 class ScanLiteral {
     private String m_curLine = "";
