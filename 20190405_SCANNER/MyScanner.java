@@ -24,12 +24,17 @@ public class MyScanner {
     private static final int DIVISOR = 0x100;
     private static final int LOOP_BREAKER = 0xff;
 
+    // type of delimiter
     private static final int ERROR = 0xff00; // rarely use group state
     private static final int DELIMITER = 0xff01;
     private static final int SKIP = 0xff02;
     private static final int DELIMITER_FROM_DFA_OF_NUMBER = 0xff03;
     private static final int DELIMITER_FROM_DFA_OF_LITERAL = 0xff04;
     private static final int DELIMITER_WITH_STARTING_ANNOTATION = 0xff05;
+
+    // type of specialState
+    private static final int IS_NORMAL_STATE = 0x00;
+    private static final int IS_FIRST_TOKEN_CURRENT_LINE = 0x01;
 
     public static void main(String[] args) {
         Scanner kb = new Scanner(System.in);
@@ -170,7 +175,7 @@ public class MyScanner {
                         m_startIdx = 0; // initialization
                         m_endIdx = 0; // initialization
                     } while(m_lineLength <= 0);
-                    m_specialState = 0x01;
+                    m_specialState = IS_FIRST_TOKEN_CURRENT_LINE;
                 }
                 info = Scan(m_curLine, m_startIdx, m_endIdx, m_specialState);
                 m_typeOfDelimiter = info.m_typeOfDelimiter;
@@ -182,7 +187,7 @@ public class MyScanner {
                     break;
                 } else break;
             }
-            m_specialState = 0x00;
+            m_specialState = IS_NORMAL_STATE;
 
             m_endIdx = info.m_endIdx;
             info.m_token = m_curLine.substring(m_startIdx, m_endIdx);
