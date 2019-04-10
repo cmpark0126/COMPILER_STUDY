@@ -16,6 +16,7 @@ public class MyScanner {
     private int m_startIdx = 0;
     private int m_endIdx = 0;
     private int m_typeOfDelimiter = 0;
+    private int m_specialState = 0;
     private String m_token = "";
     private HashMap<String, String> m_reservedSymbolMap = null;
     private HashMap<Integer, String> m_delimiterMap = null;
@@ -158,7 +159,6 @@ public class MyScanner {
 
     public InfoOfToken Scan(){
         InfoOfToken info = null;
-        int specialState = 0x01;
         try {
             while(true){
                 // System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
@@ -170,9 +170,9 @@ public class MyScanner {
                         m_startIdx = 0; // initialization
                         m_endIdx = 0; // initialization
                     } while(m_lineLength <= 0);
-                    specialState = 0x01;
+                    m_specialState = 0x01;
                 }
-                info = Scan(m_curLine, m_startIdx, m_endIdx, specialState);
+                info = Scan(m_curLine, m_startIdx, m_endIdx, m_specialState);
                 m_typeOfDelimiter = info.m_typeOfDelimiter;
                 if(m_typeOfDelimiter == SKIP) {
                     m_endIdx = info.m_endIdx;
@@ -182,7 +182,7 @@ public class MyScanner {
                     break;
                 } else break;
             }
-            specialState = 0x00;
+            m_specialState = 0x00;
 
             m_endIdx = info.m_endIdx;
             info.m_token = m_curLine.substring(m_startIdx, m_endIdx);
@@ -197,12 +197,12 @@ public class MyScanner {
         return info;
     }
 
-    public InfoOfToken Scan(String line, int startIdx, int endIdx, int specialState){
+    public static InfoOfToken Scan(String line, int startIdx, int endIdx, int specialState){
         int sizeOfLine = line.length();
         int curState = 0;
         InfoOfToken info = null;
         try {
-            // realize this now analyzing token is first token in line;
+            // recognize special state
             // for <script_start> <script_end>
             curState = CalculateNextState(curState, specialState);
 
