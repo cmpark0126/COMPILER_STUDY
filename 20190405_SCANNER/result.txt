@@ -1,0 +1,226 @@
+Enter the filename: <script_start> : script start keyword
+// initialization : comment
+var : keyword
+passes : user-defined id
+= : Assignment operator
+0 : number
+, : punctuation character
+student : user-defined id
+= : Assignment operator
+1 : number
+, : punctuation character
+// student counter : comment
+result : user-defined id
+; : semi colon character
+var : keyword
+number : user-defined id
+, : punctuation character
+sum : user-defined id
+= : Assignment operator
+0 : number
+; : semi colon character
+var : keyword
+input1 : user-defined id
+= : Assignment operator
+window.prompt : user-defined id
+( : left parentheses character
+"Enter the first number" : literal
+) : right parentheses character
+; : semi colon character
+var : keyword
+value1 : user-defined id
+= : Assignment operator
+parseFloat : user-defined id
+( : left parentheses character
+input : user-defined id
+) : right parentheses character
+; : semi colon character
+while : while loop keyword used at while statement of do-while statement
+( : left parentheses character
+student : user-defined id
+<= : less than or equal to
+5 : number
+) : right parentheses character
+{ : left brace character
+result : user-defined id
+= : Assignment operator
+window.prompt : user-defined id
+( : left parentheses character
+"Enter result" : literal
+) : right parentheses character
+; : semi colon character
+if : if keyword
+( : left parentheses character
+result : user-defined id
+== : equal to
+"1" : literal
+) : right parentheses character
+if : if keyword
+( : left parentheses character
+result : user-defined id
+== : equal to
+"2" : literal
+) : right parentheses character
+{ : left brace character
+passes : user-defined id
+= : Assignment operator
+passes : user-defined id
++ : Addition operator
+1 : number
+; : semi colon character
+square : user-defined id
+( : left parentheses character
+result : user-defined id
+) : right parentheses character
+; : semi colon character
+} : right brace character
+else : user-defined id
+failures : user-defined id
+++ : Increment operator
+; : semi colon character
+++ : Increment operator
+student : user-defined id
+; : semi colon character
+} : right brace character
+// termination phase : comment
+document.writeln : user-defined id
+( : left parentheses character
+<h1> : user-defined id
+</h1> : user-defined id
+) : right parentheses character
+; : semi colon character
+document.writeln : user-defined id
+( : left parentheses character
+<h2> : user-defined id
+</h2> : user-defined id
+) : right parentheses character
+; : semi colon character
+if : if keyword
+( : left parentheses character
+passes : user-defined id
+> : greater than
+8 : number
+) : right parentheses character
+document.writeln : user-defined id
+( : left parentheses character
+<br/> : user-defined id
+) : right parentheses character
+; : semi colon character
+for : for keyword
+( : left parentheses character
+number : user-defined id
+= : Assignment operator
+2 : number
+; : semi colon character
+number : user-defined id
+<= : less than or equal to
+100 : number
+; : semi colon character
+number : user-defined id
+++ : Increment operator
+) : right parentheses character
+sum : user-defined id
++= : Addition Assignment operator
+number : user-defined id
+; : semi colon character
+document.write : user-defined id
+( : left parentheses character
+"The sum of the even integers from 2 to 100 is " : literal
+) : right parentheses character
+; : semi colon character
+document.writeln : user-defined id
+( : left parentheses character
+sum : user-defined id
+) : right parentheses character
+; : semi colon character
+switch : switch keyword
+( : left parentheses character
+choice : user-defined id
+) : right parentheses character
+{ : left brace character
+case : case keyword used at switch statement
+"1" : literal
+: : colon character
+startTag : user-defined id
+= : Assignment operator
+<ul> : user-defined id
+; : semi colon character
+endTag : user-defined id
+= : Assignment operator
+</ul> : user-defined id
+; : semi colon character
+break : escape loop keyword
+; : semi colon character
+case : case keyword used at switch statement
+"2" : literal
+: : colon character
+startTag : user-defined id
+= : Assignment operator
+<ol> : user-defined id
+; : semi colon character
+endTag : user-defined id
+= : Assignment operator
+</ol> : user-defined id
+; : semi colon character
+listType : user-defined id
+= : Assignment operator
+<h3> : user-defined id
+</h3> : user-defined id
+; : semi colon character
+break : escape loop keyword
+; : semi colon character
+case : case keyword used at switch statement
+"3" : literal
+: : colon character
+startTag : user-defined id
+= : Assignment operator
+<ul> : user-defined id
+; : semi colon character
+endTag : user-defined id
+= : Assignment operator
+</ul> : user-defined id
+; : semi colon character
+listType : user-defined id
+= : Assignment operator
+<h3> : user-defined id
+</h3> : user-defined id
+; : semi colon character
+break : escape loop keyword
+; : semi colon character
+default : default case keyword used at switch statement
+: : colon character
+validInput : user-defined id
+= : Assignment operator
+false : boolean false keyword
+; : semi colon character
+} : right brace character
+do : do keyword used at do-while statement
+{ : left brace character
+document.writeln : user-defined id
+( : left parentheses character
+) : right parentheses character
+; : semi colon character
+++ : Increment operator
+counter : user-defined id
+; : semi colon character
+} : right brace character
+while : while loop keyword used at while statement of do-while statement
+( : left parentheses character
+counter : user-defined id
+<= : less than or equal to
+6 : number
+) : right parentheses character
+; : semi colon character
+function : keyword
+square : user-defined id
+( : left parentheses character
+y : user-defined id
+) : right parentheses character
+{ : left brace character
+return : return appropriate value to caller function and escape current function
+y : user-defined id
+* : Multiplication operator
+y : user-defined id
+; : semi colon character
+} : right brace character
+<script_end> : script end keyword

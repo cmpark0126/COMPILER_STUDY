@@ -1,6 +1,6 @@
 <script_start>
 // initialization
-var passes = 0;
+var passes = 0,
 student = 1, // student counter
 result;
 var number, sum = 0;
