@@ -6,6 +6,7 @@ result;
 var number, sum = 0;
 var input1 = window.prompt("Enter the first number");
 var value1 = parseFloat(input);
+// process 10 student
 while(student <= 5) {
     result = window.prompt("Enter result");
     if(result == "1")

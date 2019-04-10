@@ -35,6 +35,7 @@ parseFloat : user-defined id
 input : user-defined id
 ) : right parentheses character
 ; : semi colon character
+// process 10 student : comment
 while : while loop keyword used at while statement of do-while statement
 ( : left parentheses character
 student : user-defined id
@@ -85,14 +86,14 @@ student : user-defined id
 // termination phase : comment
 document.writeln : user-defined id
 ( : left parentheses character
-<h1> : user-defined id
-</h1> : user-defined id
+<h1> : keyword tag name
+</h1> : keyword tag name
 ) : right parentheses character
 ; : semi colon character
 document.writeln : user-defined id
 ( : left parentheses character
-<h2> : user-defined id
-</h2> : user-defined id
+<h2> : keyword tag name
+</h2> : keyword tag name
 ) : right parentheses character
 ; : semi colon character
 if : if keyword
@@ -103,7 +104,7 @@ passes : user-defined id
 ) : right parentheses character
 document.writeln : user-defined id
 ( : left parentheses character
-<br/> : user-defined id
+<br/> : keyword tag name
 ) : right parentheses character
 ; : semi colon character
 for : for keyword
@@ -143,11 +144,11 @@ case : case keyword used at switch statement
 : : colon character
 startTag : user-defined id
 = : Assignment operator
-<ul> : user-defined id
+<ul> : keyword tag name
 ; : semi colon character
 endTag : user-defined id
 = : Assignment operator
-</ul> : user-defined id
+</ul> : keyword tag name
 ; : semi colon character
 break : escape loop keyword
 ; : semi colon character
@@ -156,16 +157,16 @@ case : case keyword used at switch statement
 : : colon character
 startTag : user-defined id
 = : Assignment operator
-<ol> : user-defined id
+<ol> : keyword tag name
 ; : semi colon character
 endTag : user-defined id
 = : Assignment operator
-</ol> : user-defined id
+</ol> : keyword tag name
 ; : semi colon character
 listType : user-defined id
 = : Assignment operator
-<h3> : user-defined id
-</h3> : user-defined id
+<h3> : keyword tag name
+</h3> : keyword tag name
 ; : semi colon character
 break : escape loop keyword
 ; : semi colon character
@@ -174,16 +175,16 @@ case : case keyword used at switch statement
 : : colon character
 startTag : user-defined id
 = : Assignment operator
-<ul> : user-defined id
+<ul> : keyword tag name
 ; : semi colon character
 endTag : user-defined id
 = : Assignment operator
-</ul> : user-defined id
+</ul> : keyword tag name
 ; : semi colon character
 listType : user-defined id
 = : Assignment operator
-<h3> : user-defined id
-</h3> : user-defined id
+<h3> : keyword tag name
+</h3> : keyword tag name
 ; : semi colon character
 break : escape loop keyword
 ; : semi colon character

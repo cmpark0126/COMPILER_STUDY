@@ -155,6 +155,7 @@ public class MyScanner {
             m_delimiterMap.put(DELIMITER_FROM_DFA_OF_NUMBER,"number");
             m_delimiterMap.put(DELIMITER_FROM_DFA_OF_LITERAL,"literal");
             m_delimiterMap.put(DELIMITER_WITH_STARTING_ANNOTATION,"comment");
+            m_delimiterMap.put(DELIMITER_WITH_TAG_FORM,"keyword tag name");
 
         } catch(Exception e) {
             e.printStackTrace();
@@ -640,15 +641,13 @@ public class MyScanner {
         String infoOfToken = "";
         ScanLiteral scanner = null;
         try {
-            if ((infoOfToken = m_delimiterMap.get(typeOfDelimiter)) != null){
+            if((infoOfToken = infoOfToken = m_reservedSymbolMap.get(token)) != null) System.out.println(token + " : " + infoOfToken);
+            else if((infoOfToken = m_delimiterMap.get(typeOfDelimiter)) != null){
                 System.out.println(token + " : " + infoOfToken);
             }
             else {
-                if((infoOfToken = infoOfToken = m_reservedSymbolMap.get(token)) != null) System.out.println(token + " : " + infoOfToken);
-                else {
-                    m_reservedSymbolMap.put(token,"user-defined id");
-                    System.out.println(token + " : " + m_reservedSymbolMap.get(token));
-                }
+                m_reservedSymbolMap.put(token,"user-defined id");
+                System.out.println(token + " : " + m_reservedSymbolMap.get(token));
             }
 
         } catch(Exception e) {
