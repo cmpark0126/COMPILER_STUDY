@@ -32,8 +32,8 @@ public class MyScanner {
     private static final int DELIMITER_FROM_DFA_OF_LITERAL = 0xff04;
     private static final int DELIMITER_WITH_STARTING_ANNOTATION = 0xff05;
     private static final int DELIMITER_WITH_DOUBLEQOUTE_BEFORE_OPENBRAKET = 0xff06; // "<
-    private static final int DELIMITER_WITH_END_OF_LITERAL = 0xff07; // "<
-    private static final int DELIMITER_WITH_TAG_FORM = 0xff08; // "<
+    private static final int DELIMITER_WITH_END_OF_LITERAL = 0xff07; // ......"
+    private static final int DELIMITER_WITH_TAG_FORM = 0xff08; // <...>
 
     // type of specialState
     private static final int IS_NORMAL_STATE = 0x00;
