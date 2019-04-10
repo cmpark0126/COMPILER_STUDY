@@ -31,10 +31,14 @@ public class MyScanner {
     private static final int DELIMITER_FROM_DFA_OF_NUMBER = 0xff03;
     private static final int DELIMITER_FROM_DFA_OF_LITERAL = 0xff04;
     private static final int DELIMITER_WITH_STARTING_ANNOTATION = 0xff05;
+    private static final int DELIMITER_WITH_DOUBLEQOUTE_BEFORE_OPENBRAKET = 0xff06; // "<
+    private static final int DELIMITER_WITH_END_OF_LITERAL = 0xff07; // "<
+    private static final int DELIMITER_WITH_TAG_FORM = 0xff08; // "<
 
     // type of specialState
     private static final int IS_NORMAL_STATE = 0x00;
     private static final int IS_FIRST_TOKEN_CURRENT_LINE = 0x01;
+    private static final int IS_IN_LITERAL = 0x02;
 
     public static void main(String[] args) {
         Scanner kb = new Scanner(System.in);
@@ -183,12 +187,23 @@ public class MyScanner {
                 if(m_typeOfDelimiter == SKIP) {
                     m_endIdx = info.m_endIdx;
                     m_startIdx = m_endIdx;
+                } else if (m_typeOfDelimiter == DELIMITER_WITH_DOUBLEQOUTE_BEFORE_OPENBRAKET){
+                    m_endIdx = info.m_endIdx;
+                    m_startIdx = m_endIdx;
+                    m_specialState = IS_IN_LITERAL;
+                } else if (m_typeOfDelimiter == DELIMITER_WITH_END_OF_LITERAL){
+                    m_endIdx = info.m_endIdx;
+                    m_startIdx = m_endIdx;
+                    m_specialState = IS_NORMAL_STATE;
                 } else if (m_typeOfDelimiter == DELIMITER_WITH_STARTING_ANNOTATION){
                     info.m_endIdx = m_lineLength;
                     break;
+                } else if (m_specialState == IS_IN_LITERAL && m_typeOfDelimiter != DELIMITER_WITH_TAG_FORM){
+                    m_endIdx = info.m_endIdx;
+                    m_startIdx = m_endIdx;
                 } else break;
             }
-            m_specialState = IS_NORMAL_STATE;
+            if(m_specialState == IS_FIRST_TOKEN_CURRENT_LINE) m_specialState = IS_NORMAL_STATE;
 
             m_endIdx = info.m_endIdx;
             info.m_token = m_curLine.substring(m_startIdx, m_endIdx);
@@ -210,11 +225,12 @@ public class MyScanner {
         try {
             // recognize special state
             // for <script_start> <script_end>
+            // System.out.println(String.format("0x%04X", specialState));
             curState = CalculateNextState(curState, specialState);
 
             for(int i = startIdx; i < sizeOfLine; i++){
+                // System.out.println(String.format("0x%04X", curState));
                 curState = FindNextState(line.charAt(i), curState);
-                // System.out.println(String.format("0x%08X", curState));
                 if((curState / DIVISOR) == LOOP_BREAKER) { // special state case check
                     if(curState == ERROR){
                         System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected! 1");
@@ -224,11 +240,16 @@ public class MyScanner {
                 }
                 endIdx++;
             }
+            // System.out.println(String.format("0x%04X", curState));
 
             if (endIdx == sizeOfLine){
                 if(FindNextState(' ', curState) / DIVISOR != LOOP_BREAKER) {
-                    // System.out.println(String.format("0x%08X", curState));
+                    // System.out.println(String.format("0x%04X", curState));
                     System.out.println(line.substring(startIdx, endIdx) + " is Rejected! 2");
+                    System.exit(-1);
+                } else if(specialState == IS_IN_LITERAL && curState != DELIMITER_WITH_END_OF_LITERAL){
+                    // System.out.println(String.format("0x%04X", curState));
+                    System.out.println(line.substring(startIdx, endIdx) + " is need \'\"\' symbol to close sentence");
                     System.exit(-1);
                 }
             }
@@ -263,12 +284,16 @@ public class MyScanner {
                 case 0x00: if(IsDigit(ch)) nextState = CalculateNextState(0x01);
                            else if(IsLetter(ch) || IsSpecialCharForId(ch)) nextState = CalculateNextState(0x02);
                            else if(IsSpecialChar(ch)) nextState = CalculateNextState(0x03);
-                           else if(ch == '\"') nextState = CalculateNextState(0x04);
+                           else if(ch == '\"') {
+                               if((curState % DIVISOR) == IS_NORMAL_STATE) nextState = CalculateNextState(0x04);
+                               else if((curState % DIVISOR) == IS_IN_LITERAL) nextState = CalculateNextState(0x0e);
+                           }
                            else if(ch == '=') nextState = CalculateNextState(0x05);
                            else if(ch == '>') nextState = CalculateNextState(0x06);
                            else if(ch == '<') {
-                               if((curState % DIVISOR) == 0x00) nextState = CalculateNextState(0x07);
-                               if((curState % DIVISOR) == 0x01) nextState = CalculateNextState(0x0d);
+                               if((curState % DIVISOR) == IS_NORMAL_STATE) nextState = CalculateNextState(0x07);
+                               else if((curState % DIVISOR) == IS_FIRST_TOKEN_CURRENT_LINE) nextState = CalculateNextState(0x0d);
+                               else if((curState % DIVISOR) == IS_IN_LITERAL) nextState = CalculateNextState(0x0d); // case is similar in 0x01
                            }
                            else if(ch == '+') nextState = CalculateNextState(0x08);
                            else if(ch == '-') nextState = CalculateNextState(0x09);
@@ -302,6 +327,8 @@ public class MyScanner {
                 case 0x0c: nextState = DFAForSlashChar(ch, curState);
                            break;
                 case 0x0d: nextState = DFAForSpecialKeywordForRecognizingScriptCode(ch, curState);
+                           break;
+                case 0x0e: nextState = DELIMITER_WITH_END_OF_LITERAL;
                            break;
                 default: nextState = ERROR;
             }
@@ -341,7 +368,8 @@ public class MyScanner {
             switch (curState % DIVISOR) { // Need to reduce redundancy
                 case 0x00: if(IsLetter(ch) || IsSpecialCharForId(ch) || IsDigit(ch) ) nextState = curState;
                            else if(ch == '.') nextState = CalculateNextState(curState, 0x01);
-                           else if(IsSpecialChar(ch) || IsOperatorOrSign(ch) || IsBlankChar(ch)) nextState = DELIMITER;
+                           else if(IsSpecialChar(ch) || IsOperatorOrSign(ch) || IsBlankChar(ch) || ch == '\"') nextState = DELIMITER;
+                           else nextState = ERROR;
                            break;
                 case 0x01: if(IsLetter(ch)) nextState = CalculateNextState(curState, 0x00);
                            else nextState = ERROR;
@@ -364,10 +392,14 @@ public class MyScanner {
         int nextState = 0;
         try {
             switch (curState % DIVISOR) { // Need to reduce redundancy
-                case 0x00: if(ch == '\"') nextState = CalculateNextState(curState, 0x01);
+                case 0x00: if(ch == '\"') nextState = CalculateNextState(curState, 0x02);
+                           else if(ch == '<') nextState = DELIMITER_WITH_DOUBLEQOUTE_BEFORE_OPENBRAKET;
+                           else nextState = CalculateNextState(curState, 0x01);
+                           break;
+                case 0x01: if(ch == '\"') nextState = CalculateNextState(curState, 0x02);
                            else nextState = curState;
                            break;
-                case 0x01: nextState = DELIMITER_FROM_DFA_OF_LITERAL;
+                case 0x02: nextState = DELIMITER_FROM_DFA_OF_LITERAL;
                            break;
                 default: nextState = ERROR;
             }
@@ -557,10 +589,11 @@ public class MyScanner {
         int nextState = 0;
         try {
             switch (curState % DIVISOR) { // Need to reduce redundancy
-                case 0x00: if(IsLetter(ch) || IsSpecialCharForId(ch)) nextState = curState;
+                case 0x00: if(IsLetter(ch) || IsSpecialCharForId(ch) || IsDigit(ch) || ch == '/' || IsBlankChar(ch)) nextState = curState;
                            else if(ch == '>') nextState = CalculateNextState(curState, 0x01);
+                           else nextState = ERROR;
                            break;
-                case 0x01: nextState = DELIMITER;
+                case 0x01: nextState = DELIMITER_WITH_TAG_FORM;
                            break;
                 default: nextState = ERROR;
             }
@@ -608,10 +641,10 @@ public class MyScanner {
         ScanLiteral scanner = null;
         try {
             // for Optional task
-            if(typeOfDelimiter == DELIMITER_FROM_DFA_OF_LITERAL){
-                scanner = new ScanLiteral(token);
-                if(scanner.Scan() == true) return;
-            }
+            // if(typeOfDelimiter == DELIMITER_FROM_DFA_OF_LITERAL){
+            //     scanner = new ScanLiteral(token);
+            //     if(scanner.Scan() == true) return;
+            // }
 
             if ((infoOfToken = m_delimiterMap.get(typeOfDelimiter)) != null){
                 System.out.println(token + " : " + infoOfToken);
