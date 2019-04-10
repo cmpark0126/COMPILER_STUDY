@@ -183,6 +183,8 @@ public class MyScanner {
                     m_specialState = IS_FIRST_TOKEN_CURRENT_LINE;
                 }
                 info = Scan(m_curLine, m_startIdx, m_endIdx, m_specialState);
+
+                // select action as per dilimiter and curren special state
                 m_typeOfDelimiter = info.m_typeOfDelimiter;
                 if(m_typeOfDelimiter == SKIP) {
                     m_endIdx = info.m_endIdx;
@@ -348,6 +350,7 @@ public class MyScanner {
                 case 0x00: if(IsDigit(ch)) nextState = curState;
                            else if(ch == '.') nextState = CalculateNextState(curState, 0x01);
                            else if(IsSpecialChar(ch) || IsOperatorOrSign(ch) || IsBlankChar(ch)) nextState = DELIMITER_FROM_DFA_OF_NUMBER;
+                           else nextState = ERROR;
                            break;
                 case 0x01: if(IsDigit(ch)) nextState = CalculateNextState(curState, 0x00);
                            else nextState = ERROR;
