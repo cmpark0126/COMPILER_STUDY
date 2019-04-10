@@ -45,7 +45,7 @@ public class MyScanner {
         SimpleGrammarChecker sgc = null;
 
         try {
-            System.out.println("Sample running result is given below:");
+            System.out.print("Enter the filename: ");
             filename = kb.nextLine();
             file = new File(filename);
 
