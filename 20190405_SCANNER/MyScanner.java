@@ -87,26 +87,27 @@ public class MyScanner {
     public boolean InitializeReservedSymbolMap(){
         try {
             // resulved symbol
-            m_reservedSymbolMap.put("<script_start>","keyword");
+            m_reservedSymbolMap.put("<script_start>","script start keyword");
+            m_reservedSymbolMap.put("<script_end>","script end keyword");
             m_reservedSymbolMap.put("var","keyword");
             m_reservedSymbolMap.put("function","keyword");
 
             // use for special statement
-            m_reservedSymbolMap.put("if","keyword");
-            m_reservedSymbolMap.put("for","keyword");
-            m_reservedSymbolMap.put("switch","keyword");
-            m_reservedSymbolMap.put("case","keyword");
-            m_reservedSymbolMap.put("break","keyword");
-            m_reservedSymbolMap.put("default","keyword");
-            m_reservedSymbolMap.put("do","keyword");
-            m_reservedSymbolMap.put("while","keyword");
+            m_reservedSymbolMap.put("if","if keyword");
+            m_reservedSymbolMap.put("for","for keyword");
+            m_reservedSymbolMap.put("switch","switch keyword");
+            m_reservedSymbolMap.put("case","case keyword used at switch statement");
+            m_reservedSymbolMap.put("break","escape loop keyword");
+            m_reservedSymbolMap.put("default","default case keyword used at switch statement");
+            m_reservedSymbolMap.put("do","do keyword used at do-while statement");
+            m_reservedSymbolMap.put("while","while loop keyword used at while statement of do-while statement");
 
             // boolean symbol
-            m_reservedSymbolMap.put("false","keyword");
-            m_reservedSymbolMap.put("true","keyword");
+            m_reservedSymbolMap.put("false","boolean false keyword");
+            m_reservedSymbolMap.put("true","boolean true keyword");
 
             // for function return
-            m_reservedSymbolMap.put("return","keyword");
+            m_reservedSymbolMap.put("return","return appropriate value to caller function and escape current function");
 
             // special character
             m_reservedSymbolMap.put("(","left parentheses character");
