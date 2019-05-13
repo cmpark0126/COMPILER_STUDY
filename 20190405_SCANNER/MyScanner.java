@@ -639,7 +639,6 @@ public class MyScanner {
 
     public void AnalyzeToken(String token, int typeOfDelimiter){
         String infoOfToken = "";
-        // ScanLiteral scanner = null;
         try {
             if((infoOfToken = infoOfToken = m_reservedSymbolMap.get(token)) != null) System.out.println(token + " : " + infoOfToken);
             else if((infoOfToken = m_delimiterMap.get(typeOfDelimiter)) != null){
