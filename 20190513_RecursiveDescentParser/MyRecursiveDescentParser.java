@@ -358,8 +358,9 @@ public class MyRecursiveDescentParser {
     public boolean logicalExpression(){
         if(!booleanVal()){
             if(!operand()) return false; // for error
-            if(logicalOperator()) if(!operand()) return false;
-
+            else {
+                if(logicalOperator()) if(!operand()) Match(null, COMPARE_WITH_SYMBOL, "We need operand"); // for error
+            }
         }
         return true;
     }
