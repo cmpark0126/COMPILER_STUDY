@@ -379,9 +379,11 @@ public class MyRecursiveDescentParser {
         else if(needNextStmt = CheckNext("switch", COMPARE_WITH_TOKEN)) {
             switchStmt();
         }
-        else if(CheckNext("++", COMPARE_WITH_TOKEN) || CheckNext("--", COMPARE_WITH_TOKEN)) {
-            needNextStmt = true;
-            unaryop();
+        else if(needNextStmt = CheckNext("break", COMPARE_WITH_TOKEN)) {
+            Match("break", COMPARE_WITH_TOKEN, null);
+            Match(";", COMPARE_WITH_TOKEN, "We need \";\" token");
+        }
+        else if(needNextStmt = unaryop()) {
             id();
             Match(";", COMPARE_WITH_TOKEN, "We need \";\" token");
         }
