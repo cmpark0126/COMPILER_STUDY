@@ -89,7 +89,7 @@ public class MyRecursiveDescentParser {
             while(true){
                 isMatch = number.Match();
                 System.out.println(CheckMatchingStatus(isMatch));
-                RemoveInfoOfToken(); // for test
+                if(m_queue.size() != 0)RemoveInfoOfToken(); // for test
                 if(isMatch == NO_TOKEN) break;
             }
         } catch(Exception e) {
@@ -115,8 +115,6 @@ public class MyRecursiveDescentParser {
             System.exit(-1);
         }
     }
-
-
 
     public String CheckMatchingStatus(int matchingStatus){
         if(matchingStatus == MATCH) return "MATCH";
