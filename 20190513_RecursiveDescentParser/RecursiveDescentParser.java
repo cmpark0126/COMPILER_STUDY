@@ -10,14 +10,14 @@ import java.util.Map;
 import java.util.ArrayList;
 
 abstract class EBNF {
-    public abstract boolean match(String token);
+    public abstract boolean match(InfoOfToken info);
 
     @Override
     public boolean equals(Object o){
 
         if(o == null) return false;
-        String token = (String)o;
-        if(match(token)) return true;
+        InfoOfToken info = (InfoOfToken)o;
+        if(match(info)) return true;
         return false;
     }
 }
@@ -36,7 +36,10 @@ public class RecursiveDescentParser {
         }
 
         @Override
-        public boolean match(String token){
+        public boolean match(InfoOfToken info){
+            String token = info.m_token;
+            String symbolInfo = info.m_symbolInfo;
+
             for(char ch: token.toCharArray()) {
                 if(!IsDigit(ch)) return false;
             }
@@ -62,7 +65,7 @@ public class RecursiveDescentParser {
                 info = scanner.Scan();
                 if(info == null) break;
                 System.out.println(info.m_token + " : "
-                                    + number.equals((Object)info.m_token) + " : "
+                                    + number.equals((Object)info) + " : "
                                     + info.m_symbolInfo);
                 // System.out.println(scanner.GetCurLineNum() + " : " + scanner.GetCurLine());
             }
