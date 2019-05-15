@@ -121,7 +121,7 @@ public class MyRecursiveDescentParser {
         Match("user-defined id", COMPARE_WITH_SYMBOL, "We need id");
         if(CheckNext("(", COMPARE_WITH_TOKEN)){
             Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
-            parameter();
+            FunctionParameter();
             Match(")", COMPARE_WITH_TOKEN, "We need \")\" token");
         }
         return;
@@ -132,11 +132,15 @@ public class MyRecursiveDescentParser {
         return;
     }
 
-    public void parameter(){
+    public void FunctionParameter(){
         if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
         else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
         else if(CheckNext("literal", COMPARE_WITH_SYMBOL)) literal();
-        else Match(null, COMPARE_WITH_SYMBOL, "We need number or id or literal"); // for error
+
+        if(CheckNext(",", COMPARE_WITH_TOKEN)) {
+            Match(",", COMPARE_WITH_TOKEN, "We need \",\" token");
+            FunctionParameter();
+        }
         return;
     }
 
