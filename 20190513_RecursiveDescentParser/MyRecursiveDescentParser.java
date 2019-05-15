@@ -62,6 +62,15 @@ public class MyRecursiveDescentParser {
         kb.close();
     }
 
+    public int Match(String expectedToken){
+        InfoOfToken info = GetInfoOfToken();
+        if(info == null) return NO_TOKEN;
+
+        if (!info.m_token.equals(expectedToken)) return NO_MATCH;
+        RemoveInfoOfToken();
+        return MATCH;
+    }
+
     public MyRecursiveDescentParser(MyScanner scanner){
         try {
             m_scanner = scanner;
@@ -107,14 +116,7 @@ public class MyRecursiveDescentParser {
         }
     }
 
-    public int Match(String expectedToken){
-        InfoOfToken info = GetInfoOfToken();
-        if(info == null) return NO_TOKEN;
 
-        if (!info.m_token.equals(expectedToken)) return NO_MATCH;
-        RemoveInfoOfToken();
-        return MATCH;
-    }
 
     public String CheckMatchingStatus(int matchingStatus){
         if(matchingStatus == MATCH) return "MATCH";
