@@ -169,8 +169,8 @@ public class MyRecursiveDescentParser {
     }
 
     public void term(){
-        if(factor() && mulop()){
-            factor();
+        if(operand() && mulop()){
+            operand();
         }
     }
 
@@ -279,6 +279,35 @@ public class MyRecursiveDescentParser {
         return;
     }
 
+    public void switchStmt(){
+        Match("switch", COMPARE_WITH_TOKEN, "We need \"switch\" token");
+        Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
+        expression();
+        Match(")", COMPARE_WITH_TOKEN, "We need \")\" token");
+        Match("{", COMPARE_WITH_TOKEN, "We need \"{\" token");
+        caseStmt();
+        Match("}", COMPARE_WITH_TOKEN, "We need \"}\" token");
+        return;
+    }
+
+    public void caseStmt(){
+        boolean needNextStmt = false;
+        if(needNextStmt = CheckNext("case", COMPARE_WITH_TOKEN)){
+            Match("case", COMPARE_WITH_TOKEN, null);
+            operand();
+            Match(":", COMPARE_WITH_TOKEN, null);
+            stmt();
+        } else if(needNextStmt = CheckNext("default", COMPARE_WITH_TOKEN)) {
+            Match("default", COMPARE_WITH_TOKEN, null);
+            Match(":", COMPARE_WITH_TOKEN, null);
+            stmt();
+        }
+
+        if(needNextStmt) caseStmt();
+
+        return;
+    }
+
     public boolean logicalOperator(){
         if(CheckNext("==", COMPARE_WITH_TOKEN))
             Match("==", COMPARE_WITH_TOKEN, null);
@@ -346,6 +375,9 @@ public class MyRecursiveDescentParser {
         }
         else if(needNextStmt = CheckNext("if", COMPARE_WITH_TOKEN)) {
             ifLoop();
+        }
+        else if(needNextStmt = CheckNext("switch", COMPARE_WITH_TOKEN)) {
+            switchStmt();
         }
         else if(CheckNext("++", COMPARE_WITH_TOKEN) || CheckNext("--", COMPARE_WITH_TOKEN)) {
             needNextStmt = true;
