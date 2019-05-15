@@ -248,7 +248,8 @@ public class MyScanner {
             // System.out.println(String.format("0x%04X", curState));
 
             if (endIdx == sizeOfLine){
-                if(FindNextState(' ', curState) / DIVISOR != LOOP_BREAKER) {
+                curState = FindNextState(' ', curState);
+                if(curState / DIVISOR != LOOP_BREAKER) {
                     // System.out.println(String.format("0x%04X", curState));
                     System.out.println(line.substring(startIdx, endIdx) + " is Rejected! 2");
                     System.exit(-1);
@@ -261,6 +262,7 @@ public class MyScanner {
 
             info = new InfoOfToken();
             info.m_typeOfDelimiter = curState;
+            // System.out.println(String.format("0x%04X", curState));
             info.m_endIdx = endIdx;
 
         } catch(Exception e) {
