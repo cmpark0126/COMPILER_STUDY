@@ -166,17 +166,24 @@ public class MyRecursiveDescentParser {
         return;
     }
 
+    public void whileLoop(){
+        Match("while", COMPARE_WITH_TOKEN, "We need \"while\" token");
+
+        return;
+    }
+
     public void stmt(){
         InfoOfToken info = GetInfoOfToken();
         String token = info.m_token;
         String symbol = info.m_symbolInfo;
         boolean checkSymbol = false;
-        boolean needNestStmt = false;
+        boolean needNextStmt = false;
 
-        if(needNestStmt = CheckNext("var", COMPARE_WITH_TOKEN)) varDeclare();
-        else if(needNestStmt = CheckNext("comment", COMPARE_WITH_SYMBOL)) comment();
+        if(needNextStmt = CheckNext("var", COMPARE_WITH_TOKEN)) varDeclare();
+        else if(needNextStmt = CheckNext("while", COMPARE_WITH_TOKEN)) whileLoop();
+        else if(needNextStmt = CheckNext("comment", COMPARE_WITH_SYMBOL)) comment();
 
-        if(needNestStmt) stmt();
+        if(needNextStmt) stmt();
 
         return;
     }
