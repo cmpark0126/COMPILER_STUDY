@@ -87,13 +87,15 @@ public class MyRecursiveDescentParser {
             if(givenValue == null || expectedValue == null) throw new Exception("There is a no Token!: " + errorMessage);
             if(!givenValue.equals(expectedValue)) throw new Exception("Token is wrong value: " + errorMessage);
         } catch(Exception e) {
-            System.out.println("line num: " + info.m_curLinenum);
-            System.out.println(info.m_curLine);
-            for(int i = 0; i < info.m_startIdx; i++) System.out.print(" ");
-            for(int i = info.m_startIdx; i < info.m_endIdx; i++) System.out.print("-");
-            System.out.println();
-            for(int i = 0; i < info.m_endIdx - 1; i++) System.out.print(" ");
-            System.out.println("^");
+            if(givenValue != null){
+                System.out.println("line num: " + info.m_curLinenum);
+                System.out.println(info.m_curLine);
+                for(int i = 0; i < info.m_startIdx; i++) System.out.print(" ");
+                for(int i = info.m_startIdx; i < info.m_endIdx; i++) System.out.print("-");
+                System.out.println();
+                for(int i = 0; i < info.m_endIdx - 1; i++) System.out.print(" ");
+                System.out.println("^");
+            }
             System.out.println(e);
             System.exit(-1);
         }
@@ -115,6 +117,11 @@ public class MyRecursiveDescentParser {
         return;
     }
 
+    public void id(){
+        Match("user-defined id", COMPARE_WITH_SYMBOL, "We need id"); // match is clear buffer automatically, so please use carefully
+        return;
+    }
+
     public void comment(){
         Match("comment", COMPARE_WITH_SYMBOL, "We need comment");
         return;
@@ -127,16 +134,17 @@ public class MyRecursiveDescentParser {
         while(true){
             if(CheckNext("=", COMPARE_WITH_TOKEN)) {
                 Match("=", COMPARE_WITH_TOKEN, "We need \"=\" token");
-                number();
+                if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
+                else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
+                else Match(null, COMPARE_WITH_TOKEN, "We need number or id");
             } else if(CheckNext(",", COMPARE_WITH_TOKEN)) {
                 Match(",", COMPARE_WITH_TOKEN, "We need \",\" token");
                 while(CheckNext("comment", COMPARE_WITH_SYMBOL)) comment();
-                Match("user-defined id", COMPARE_WITH_SYMBOL, "We need user-defined id");
+                id();
             } else break;
         }
 
         Match(";", COMPARE_WITH_TOKEN, "We need \",\" token");
-
         return;
     }
 
