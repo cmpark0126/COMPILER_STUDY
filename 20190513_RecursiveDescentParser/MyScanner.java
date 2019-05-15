@@ -98,18 +98,18 @@ public class MyScanner {
             m_reservedSymbolMap.put("if","if keyword");
             m_reservedSymbolMap.put("for","for keyword");
             m_reservedSymbolMap.put("switch","switch keyword");
-            m_reservedSymbolMap.put("case","case keyword used at switch statement");
+            m_reservedSymbolMap.put("case","case keyword");
             m_reservedSymbolMap.put("break","escape loop keyword");
-            m_reservedSymbolMap.put("default","default case keyword used at switch statement");
-            m_reservedSymbolMap.put("do","do keyword used at do-while statement");
-            m_reservedSymbolMap.put("while","while loop keyword used at while statement of do-while statement");
+            m_reservedSymbolMap.put("default","default case keyword");
+            m_reservedSymbolMap.put("do","do keyword");
+            m_reservedSymbolMap.put("while","while loop keyword");
 
             // boolean symbol
             m_reservedSymbolMap.put("false","boolean false keyword");
             m_reservedSymbolMap.put("true","boolean true keyword");
 
             // for function return
-            m_reservedSymbolMap.put("return","return appropriate value to caller function and escape current function");
+            m_reservedSymbolMap.put("return","return value");
 
             // special character
             m_reservedSymbolMap.put("(","left parentheses character");
