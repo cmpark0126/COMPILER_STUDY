@@ -130,6 +130,7 @@ public class MyRecursiveDescentParser {
                 number();
             } else if(CheckNext(",", COMPARE_WITH_TOKEN)) {
                 Match(",", COMPARE_WITH_TOKEN, "We need \",\" token");
+                while(CheckNext("comment", COMPARE_WITH_SYMBOL)) comment();
                 Match("user-defined id", COMPARE_WITH_SYMBOL, "We need user-defined id");
             } else break;
         }
