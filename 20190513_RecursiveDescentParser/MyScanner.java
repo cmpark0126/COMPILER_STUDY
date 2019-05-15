@@ -241,7 +241,8 @@ public class MyScanner {
                 curState = FindNextState(line.charAt(i), curState);
                 if((curState / DIVISOR) == LOOP_BREAKER) { // special state case check
                     if(curState == ERROR){
-                        System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected! 1");
+                        System.out.println("Scanner Error!");
+                        System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected!");
                         System.exit(-1);
                     }
                     break;
@@ -254,10 +255,12 @@ public class MyScanner {
                 curState = FindNextState(' ', curState);
                 if(curState / DIVISOR != LOOP_BREAKER) {
                     // System.out.println(String.format("0x%04X", curState));
+                    System.out.println("Scanner Error!");
                     System.out.println(line.substring(startIdx, endIdx) + " is Rejected! 2");
                     System.exit(-1);
                 } else if(specialState == IS_IN_LITERAL && curState != DELIMITER_WITH_END_OF_LITERAL){
                     // System.out.println(String.format("0x%04X", curState));
+                    System.out.println("Scanner Error!");
                     System.out.println(line.substring(startIdx, endIdx) + " is need \'\"\' symbol to close sentence");
                     System.exit(-1);
                 }

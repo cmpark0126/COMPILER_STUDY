@@ -84,6 +84,7 @@ public class MyRecursiveDescentParser {
             if(givenValue == null || expectedValue == null) throw new Exception("There is a no Token!: " + errorMessage);
             if(!givenValue.equals(expectedValue)) throw new Exception("Token is wrong value: " + errorMessage);
         } catch(Exception e) {
+            System.out.println("Parsing Error!");
             if(givenValue != null){
                 System.out.println("line num: " + info.m_curLinenum);
                 System.out.println(info.m_curLine);
