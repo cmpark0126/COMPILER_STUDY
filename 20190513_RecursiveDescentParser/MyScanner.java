@@ -212,6 +212,8 @@ public class MyScanner {
             info.m_token = m_curLine.substring(m_startIdx, m_endIdx);
             AnalyzeToken(info.m_token, info.m_typeOfDelimiter);
             info.m_symbolInfo = m_reservedSymbolMap.get(info.m_token);
+            info.m_curLine = m_curLine;
+            info.m_curLinenum = m_curLinenum;
             m_startIdx = m_endIdx;
 
         } catch(Exception e) {
