@@ -26,30 +26,7 @@ abstract class NonTerminal extends EBNF{
 }
 
 abstract class Terminal extends EBNF{
-    public static final int DELIMITER = -1;
-    public static final int ERROR = -2;
 
-    public abstract int nextState(char ch, int current_state);
-
-    public boolean dfa(String input){
-        int current_state = 0;
-        int lengthOfStr = input.length();
-
-    	for(int i = 0; i < lengthOfStr; i++){ // independent function
-            char ch = input.charAt(i);
-
-            current_state = nextState(ch, current_state);
-            if(current_state == ERROR) return false;
-        }
-
-        current_state = nextState(' ', current_state);
-    	return (current_state == DELIMITER)? true : false;
-    }
-
-    @Override
-    public boolean match(String token){
-        return dfa(token);
-    }
 }
 
 public class RecursiveDescentParser {
@@ -58,17 +35,12 @@ public class RecursiveDescentParser {
             return (ch >= 48 && ch <= 57)? true : false;
         }
 
-   		@Override
-   		public int nextState(char ch, int current_state){
-            switch (current_state) {
-                case 0: if(ch == '-') return 1;
-                        else if(IsDigit(ch)) return 1;
-                        else return ERROR;
-                case 1: if(IsDigit(ch)) return 1;
-                        else if(ch == ' ') return DELIMITER;
-                        else return ERROR;
-                default: return ERROR;
+        @Override
+        public boolean match(String token){
+            for(char ch: token.toCharArray()) {
+                if(!IsDigit(ch)) return false;
             }
+            return true;
         }
    	};
 
@@ -89,8 +61,10 @@ public class RecursiveDescentParser {
             while(true) {
                 info = scanner.Scan();
                 if(info == null) break;
-                System.out.println(info.m_token + " : " + number.equals((Object)info.m_token));
-                System.out.println(scanner.GetCurLineNum() + " : " + scanner.GetCurLine());
+                System.out.println(info.m_token + " : "
+                                    + number.equals((Object)info.m_token) + " : "
+                                    + info.m_symbolInfo);
+                // System.out.println(scanner.GetCurLineNum() + " : " + scanner.GetCurLine());
             }
 
         } catch(Exception e) {

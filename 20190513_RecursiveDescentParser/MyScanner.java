@@ -207,8 +207,11 @@ public class MyScanner {
             }
             if(m_specialState == IS_FIRST_TOKEN_CURRENT_LINE) m_specialState = IS_NORMAL_STATE;
 
+            AnalyzeToken(info.m_token, info.m_typeOfDelimiter);
+
             m_endIdx = info.m_endIdx;
             info.m_token = m_curLine.substring(m_startIdx, m_endIdx);
+            info.m_symbolInfo = m_reservedSymbolMap.get(info.m_token);
             m_startIdx = m_endIdx;
 
         } catch(Exception e) {
@@ -642,9 +645,9 @@ public class MyScanner {
     public void AnalyzeToken(String token, int typeOfDelimiter){
         String infoOfToken = "";
         try {
-            if((infoOfToken = infoOfToken = m_reservedSymbolMap.get(token)) != null) {
+            if((infoOfToken = m_reservedSymbolMap.get(token)) != null) {
                 // System.out.println(token + " : " + infoOfToken);
-                ;
+                return;
             }
             else if((infoOfToken = m_delimiterMap.get(typeOfDelimiter)) != null){
                 m_reservedSymbolMap.put(token, infoOfToken);
@@ -671,10 +674,15 @@ public class MyScanner {
     public int GetCurLineNum(){
         return m_curLinenum;
     }
+
+    // public String GetReservedSymbolInfo(String token){
+    //     return m_reservedSymbolMap.get(token);
+    // }
 }
 
 class InfoOfToken {
     public int m_typeOfDelimiter = 0;
     public int m_endIdx = 0;
     public String m_token = "";
+    public String m_symbolInfo = "";
 }
