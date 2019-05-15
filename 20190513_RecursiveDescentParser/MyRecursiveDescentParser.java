@@ -11,7 +11,16 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 abstract class EBNF {
+    public static final int MATCH = 1;
+    public static final int NO_MATCH = -1;
+    public static final int NO_TOKEN = -2;
+
     public abstract int Match();
+    public int Match(String givenValue, String expectedValue){
+        if(givenValue == null || expectedValue == null) return NO_TOKEN;
+        if(!givenValue.equals(expectedValue)) return NO_MATCH;
+        return MATCH;
+    }
 }
 abstract class NonTerminal extends EBNF{}
 abstract class Terminal extends EBNF{}
@@ -20,19 +29,14 @@ public class MyRecursiveDescentParser {
     private MyScanner m_scanner = null;
     private LinkedList<InfoOfToken> m_queue = null;
 
-    private static final int MATCH = 1;
-    private static final int NO_MATCH = -1;
-    private static final int NO_TOKEN = -2;
-
     public Terminal number = new Terminal(){
         @Override
         public int Match(){
+            int matchingStatus = 0;
             InfoOfToken info = GetInfoOfToken();
-            if(info == null) return NO_TOKEN;
-
-            if(!info.m_symbolInfo.equals("number")) return NO_MATCH;
             RemoveInfoOfToken(); // if matched we need to delete this element from queue
-            return MATCH;
+            matchingStatus = Match(info.m_symbolInfo, "number");
+            return matchingStatus;
         }
    	};
 
@@ -62,15 +66,6 @@ public class MyRecursiveDescentParser {
         kb.close();
     }
 
-    public int Match(String expectedToken){
-        InfoOfToken info = GetInfoOfToken();
-        if(info == null) return NO_TOKEN;
-
-        if (!info.m_token.equals(expectedToken)) return NO_MATCH;
-        RemoveInfoOfToken();
-        return MATCH;
-    }
-
     public MyRecursiveDescentParser(MyScanner scanner){
         try {
             m_scanner = scanner;
@@ -90,7 +85,7 @@ public class MyRecursiveDescentParser {
                 isMatch = number.Match();
                 System.out.println(CheckMatchingStatus(isMatch));
                 if(m_queue.size() != 0)RemoveInfoOfToken(); // for test
-                if(isMatch == NO_TOKEN) break;
+                if(isMatch == EBNF.NO_TOKEN) break;
             }
         } catch(Exception e) {
             e.printStackTrace();
@@ -103,7 +98,9 @@ public class MyRecursiveDescentParser {
 
     public InfoOfToken GetInfoOfToken(){
         if(m_queue.size() == 0) m_queue.add(m_scanner.Scan());
-        return m_queue.peek();
+        InfoOfToken temp = m_queue.peek();
+        if(temp == null) temp = new InfoOfToken();
+        return temp;
     }
 
     public void RemoveInfoOfToken(){
@@ -117,9 +114,9 @@ public class MyRecursiveDescentParser {
     }
 
     public String CheckMatchingStatus(int matchingStatus){
-        if(matchingStatus == MATCH) return "MATCH";
-        else if(matchingStatus == NO_MATCH) return "NO_MATCH";
-        if (matchingStatus == NO_TOKEN) return "NO_TOKEN";
+        if(matchingStatus == EBNF.MATCH) return "MATCH";
+        else if(matchingStatus == EBNF.NO_MATCH) return "NO_MATCH";
+        if (matchingStatus == EBNF.NO_TOKEN) return "NO_TOKEN";
         return "Wrong Status";
     }
 }
