@@ -17,6 +17,8 @@ public class MyRecursiveDescentParser {
     private static final int MATCH = 1;
     private static final int NO_MATCH = -1;
     private static final int NO_TOKEN = -2;
+    private static final boolean COMPARE_WITH_TOKEN = true;
+    private static final boolean COMPARE_WITH_SYMBOL = false;
 
     public static void main(String[] args) {
         Scanner kb = new Scanner(System.in);
@@ -60,7 +62,7 @@ public class MyRecursiveDescentParser {
 
         try {
             while(true){
-                jsscodeMatch();
+                jsscode();
             }
         } catch(Exception e) {
             e.printStackTrace();
@@ -71,13 +73,13 @@ public class MyRecursiveDescentParser {
         return true;
     }
 
-    public void Match(String expectedValue, boolean compareWithToken, String errorMessage){
+    public void Match(String expectedValue, boolean option, String errorMessage){
         InfoOfToken info = null;
         String givenValue = null;
         info = GetInfoOfToken();
         RemoveInfoOfToken(); // if matched we need to delete this element from queue
-        if(compareWithToken) givenValue = info.m_token;
-        else givenValue = info.m_symbolInfo; // or compare with symbol
+        if(option == COMPARE_WITH_TOKEN) givenValue = info.m_token;
+        else if(option == COMPARE_WITH_SYMBOL) givenValue = info.m_symbolInfo; // or compare with symbol
 
         System.out.println("m_token: "+ info.m_token + ", m_symbolInfo: " + info.m_symbolInfo);
 
@@ -99,41 +101,74 @@ public class MyRecursiveDescentParser {
         return;
     }
 
-    public void numberMatch(){
-        Match("number", false, "We need number"); // match is clear buffer automatically, so please use carefully
+    public void number(){
+        Match("number", COMPARE_WITH_SYMBOL, "We need number"); // match is clear buffer automatically, so please use carefully
         return;
     }
 
-    public void commentMatch(){
-        Match("comment", false, "We need comment");
+    public void comment(){
+        Match("comment", COMPARE_WITH_SYMBOL, "We need comment");
         return;
     }
 
-    public void stmtMatch(){
+    public void varDeclare() {
+        InfoOfToken info = null;
+        String token = null;
+        String symbol = null;
+
+        Match("var", COMPARE_WITH_TOKEN, "We need \"var\" token");
+        Match("user-defined id", COMPARE_WITH_SYMBOL, "We need user-defined id");
+
+        while(true){
+            info = GetInfoOfToken();
+            token = info.m_token;
+            symbol = info.m_symbolInfo;
+
+            if(token.equals("=")) {
+                Match("=", COMPARE_WITH_TOKEN, "We need \"=\" token");
+                number();
+            } else if(token.equals(",")) {
+                Match(",", COMPARE_WITH_TOKEN, "We need \",\" token");
+                Match("user-defined id", COMPARE_WITH_SYMBOL, "We need user-defined id");
+            } else break;
+        }
+
+        Match(";", COMPARE_WITH_TOKEN, "We need \",\" token");
+
+        return;
+    }
+
+    public void stmt(){
         InfoOfToken info = GetInfoOfToken();
         String token = info.m_token;
         String symbol = info.m_symbolInfo;
         boolean checkSymbol = false;
+        boolean isEmpty = false;
 
         switch (token) {
+            case "var": varDeclare();
+                        stmt();
+                        break;
             default: checkSymbol = true;
                      break;
         }
 
         switch (symbol) {
-            case "comment": Match("comment", false, "We need comment");
-                            stmtMatch();
+            case "comment": Match("comment", COMPARE_WITH_SYMBOL, "We need comment");
                             break;
-            default: break;
+            default: isEmpty = true;
+                     break;
         }
+
+        if(!isEmpty) stmt();
 
         return;
     }
 
-    public void jsscodeMatch(){
-        Match("<script_start>", true, "We need \"<script_start>\" token");
-        stmtMatch();
-        Match("<script_end>", true, "We need \"<script_end>\" token");
+    public void jsscode(){
+        Match("<script_start>", COMPARE_WITH_TOKEN, "We need \"<script_start>\" token");
+        stmt();
+        Match("<script_end>", COMPARE_WITH_TOKEN, "We need \"<script_end>\" token");
         return;
     }
 
