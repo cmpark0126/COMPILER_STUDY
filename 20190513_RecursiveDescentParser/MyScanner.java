@@ -207,10 +207,10 @@ public class MyScanner {
             }
             if(m_specialState == IS_FIRST_TOKEN_CURRENT_LINE) m_specialState = IS_NORMAL_STATE;
 
-            AnalyzeToken(info.m_token, info.m_typeOfDelimiter);
 
             m_endIdx = info.m_endIdx;
             info.m_token = m_curLine.substring(m_startIdx, m_endIdx);
+            AnalyzeToken(info.m_token, info.m_typeOfDelimiter);
             info.m_symbolInfo = m_reservedSymbolMap.get(info.m_token);
             m_startIdx = m_endIdx;
 
