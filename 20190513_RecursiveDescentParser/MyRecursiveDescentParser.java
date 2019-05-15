@@ -101,6 +101,15 @@ public class MyRecursiveDescentParser {
         return;
     }
 
+    public boolean CheckNext(String expectedValue, boolean option){
+        InfoOfToken info = GetInfoOfToken();
+        String givenValue = null;
+        if(option == COMPARE_WITH_TOKEN) givenValue = info.m_token;
+        else if(option == COMPARE_WITH_SYMBOL) givenValue = info.m_symbolInfo;
+
+        return givenValue.equals(expectedValue);
+    }
+
     public void number(){
         Match("number", COMPARE_WITH_SYMBOL, "We need number"); // match is clear buffer automatically, so please use carefully
         return;
@@ -112,22 +121,14 @@ public class MyRecursiveDescentParser {
     }
 
     public void varDeclare() {
-        InfoOfToken info = null;
-        String token = null;
-        String symbol = null;
-
         Match("var", COMPARE_WITH_TOKEN, "We need \"var\" token");
         Match("user-defined id", COMPARE_WITH_SYMBOL, "We need user-defined id");
 
         while(true){
-            info = GetInfoOfToken();
-            token = info.m_token;
-            symbol = info.m_symbolInfo;
-
-            if(token.equals("=")) {
+            if(CheckNext("=", COMPARE_WITH_TOKEN)) {
                 Match("=", COMPARE_WITH_TOKEN, "We need \"=\" token");
                 number();
-            } else if(token.equals(",")) {
+            } else if(CheckNext(",", COMPARE_WITH_TOKEN)) {
                 Match(",", COMPARE_WITH_TOKEN, "We need \",\" token");
                 Match("user-defined id", COMPARE_WITH_SYMBOL, "We need user-defined id");
             } else break;
@@ -143,24 +144,12 @@ public class MyRecursiveDescentParser {
         String token = info.m_token;
         String symbol = info.m_symbolInfo;
         boolean checkSymbol = false;
-        boolean isEmpty = false;
+        boolean needNestStmt = false;
 
-        switch (token) {
-            case "var": varDeclare();
-                        stmt();
-                        break;
-            default: checkSymbol = true;
-                     break;
-        }
+        if(needNestStmt = CheckNext("var", COMPARE_WITH_TOKEN)) varDeclare();
+        else if(needNestStmt = CheckNext("comment", COMPARE_WITH_SYMBOL)) comment();
 
-        switch (symbol) {
-            case "comment": Match("comment", COMPARE_WITH_SYMBOL, "We need comment");
-                            break;
-            default: isEmpty = true;
-                     break;
-        }
-
-        if(!isEmpty) stmt();
+        if(needNestStmt) stmt();
 
         return;
     }
