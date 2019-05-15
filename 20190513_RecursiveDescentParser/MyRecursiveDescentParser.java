@@ -79,7 +79,7 @@ public class MyRecursiveDescentParser {
         if(compareWithToken) givenValue = info.m_token;
         else givenValue = info.m_symbolInfo; // or compare with symbol
 
-        // System.out.println("m_token: "+ info.m_token + ", m_symbolInfo: " + info.m_symbolInfo);
+        System.out.println("m_token: "+ info.m_token + ", m_symbolInfo: " + info.m_symbolInfo);
 
         try {
             if(givenValue == null || expectedValue == null) throw new Exception("There is a no Token!: " + errorMessage);
@@ -104,21 +104,33 @@ public class MyRecursiveDescentParser {
         return;
     }
 
-    public void stmtMatch(){
+    public void commentMatch(){
         Match("comment", false, "We need comment");
-        Match("var", true, "We need number"); // match is clear buffer automatically, so please use carefully
+        return;
+    }
+
+    public void stmtMatch(){
+        InfoOfToken info = GetInfoOfToken();
+        String token = info.m_token;
+        String symbol = info.m_symbolInfo;
+        boolean checkSymbol = false;
+
+        switch (token) {
+            default: checkSymbol = true;
+                     break;
+        }
+
+        switch (symbol) {
+            case "comment": Match("comment", false, "We need comment");
+                            stmtMatch();
+                            break;
+            default: break;
+        }
+
         return;
     }
 
     public void jsscodeMatch(){
-        InfoOfToken info = null;
-        String symbol = null;
-        while(true){ // Handling comment
-            info = GetInfoOfToken();
-            symbol = info.m_symbolInfo;
-            if(symbol.equals("comment")) Match("comment", false, "We need comment");
-            else break;
-        }
         Match("<script_start>", true, "We need \"<script_start>\" token");
         stmtMatch();
         Match("<script_end>", true, "We need \"<script_end>\" token");
