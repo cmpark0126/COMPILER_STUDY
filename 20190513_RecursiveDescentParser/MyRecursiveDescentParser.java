@@ -96,6 +96,7 @@ public class MyRecursiveDescentParser {
                 for(int i = 0; i < info.m_endIdx - 1; i++) System.out.print(" ");
                 System.out.println("^");
             }
+            e.printStackTrace();
             System.out.println(e);
             System.exit(-1);
         }
@@ -175,7 +176,14 @@ public class MyRecursiveDescentParser {
 
     public boolean addop(){
         if(CheckNext("+", COMPARE_WITH_TOKEN)) Match("+", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("-", COMPARE_WITH_TOKEN)) Match("=", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("-", COMPARE_WITH_TOKEN)) Match("-", COMPARE_WITH_TOKEN, null);
+        else return false;
+        return true;
+    }
+
+    public boolean unaryop(){
+        if(CheckNext("++", COMPARE_WITH_TOKEN)) Match("++", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("--", COMPARE_WITH_TOKEN)) Match("--", COMPARE_WITH_TOKEN, null);
         else return false;
         return true;
     }
@@ -210,9 +218,39 @@ public class MyRecursiveDescentParser {
         Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
         logicalExpression();
         Match(")", COMPARE_WITH_TOKEN, "We need \")\" token");
-        Match("{", COMPARE_WITH_TOKEN, "We need \"{\" token");
-        stmt();
-        Match("}", COMPARE_WITH_TOKEN, "We need \"}\" token");
+        if(CheckNext("{", COMPARE_WITH_TOKEN)){
+            Match("{", COMPARE_WITH_TOKEN, "We need \"{\" token");
+            stmt();
+            Match("}", COMPARE_WITH_TOKEN, "We need \"}\" token");
+        } else {
+            stmt();
+        }
+        return;
+    }
+
+    public void ifLoop(){
+        Match("if", COMPARE_WITH_TOKEN, "We need \"if\" token");
+        Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
+        logicalExpression();
+        Match(")", COMPARE_WITH_TOKEN, "We need \")\" token");
+        if(CheckNext("{", COMPARE_WITH_TOKEN)){
+            Match("{", COMPARE_WITH_TOKEN, "We need \"{\" token");
+            stmt();
+            Match("}", COMPARE_WITH_TOKEN, "We need \"}\" token");
+        } else {
+            stmt();
+        }
+
+        if(CheckNext("else", COMPARE_WITH_TOKEN)){
+            Match("else", COMPARE_WITH_TOKEN, null);
+            if(CheckNext("{", COMPARE_WITH_TOKEN)){
+                Match("{", COMPARE_WITH_TOKEN, "We need \"{\" token");
+                stmt();
+                Match("}", COMPARE_WITH_TOKEN, "We need \"}\" token");
+            } else {
+                stmt();
+            }
+        }
         return;
     }
 
@@ -238,9 +276,13 @@ public class MyRecursiveDescentParser {
     }
 
     public void valueAssign(){
-        Match("user-defined id", COMPARE_WITH_SYMBOL, "We need user-defined id");
         Match("=", COMPARE_WITH_TOKEN, null);
         expression();
+    }
+
+    public void useId(){
+        id();
+        if(!unaryop() && CheckNext("=", COMPARE_WITH_TOKEN)) valueAssign();
     }
 
     public void stmt(){
@@ -257,8 +299,17 @@ public class MyRecursiveDescentParser {
         else if(needNextStmt = CheckNext("while", COMPARE_WITH_TOKEN)) {
             whileLoop();
         }
+        else if(needNextStmt = CheckNext("if", COMPARE_WITH_TOKEN)) {
+            ifLoop();
+        }
+        else if(CheckNext("++", COMPARE_WITH_TOKEN) || CheckNext("--", COMPARE_WITH_TOKEN)) {
+            needNextStmt = true;
+            unaryop();
+            id();
+            Match(";", COMPARE_WITH_TOKEN, "We need \";\" token");
+        }
         else if(needNextStmt = CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) {
-            valueAssign();
+            useId();
             Match(";", COMPARE_WITH_TOKEN, "We need \";\" token");
         }
         else if(needNextStmt = CheckNext("comment", COMPARE_WITH_SYMBOL)) {
