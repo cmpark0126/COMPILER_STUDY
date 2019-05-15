@@ -392,10 +392,6 @@ public class MyRecursiveDescentParser {
     }
 
     public void stmt(){
-        InfoOfToken info = GetInfoOfToken();
-        String token = info.m_token;
-        String symbol = info.m_symbolInfo;
-        boolean checkSymbol = false;
         boolean needNextStmt = false;
 
         if(needNextStmt = CheckNext("var", COMPARE_WITH_TOKEN)) {
@@ -447,7 +443,17 @@ public class MyRecursiveDescentParser {
         return;
     }
 
+    public void initialComment(){
+        boolean needNextStmt = false;
+        if(needNextStmt = CheckNext("comment", COMPARE_WITH_SYMBOL)) {
+            comment();
+        }
+        if(needNextStmt) initialComment();
+        return;
+    }
+
     public void jsscode(){
+        initialComment();
         Match("<script_start>", COMPARE_WITH_TOKEN, "We need \"<script_start>\" token");
         stmt();
         Match("<script_end>", COMPARE_WITH_TOKEN, "We need \"<script_end>\" token");
