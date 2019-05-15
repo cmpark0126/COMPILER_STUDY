@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 abstract class EBNF {
-    public abstract boolean match();
+    public abstract int Match();
 }
 abstract class NonTerminal extends EBNF{}
 abstract class Terminal extends EBNF{}
@@ -20,22 +20,19 @@ public class MyRecursiveDescentParser {
     private MyScanner m_scanner = null;
     private LinkedList<InfoOfToken> m_queue = null;
 
+    private static final int MATCH = 1;
+    private static final int NO_MATCH = -1;
+    private static final int NO_TOKEN = -2;
+
     public Terminal number = new Terminal(){
         @Override
-        public boolean match(){
+        public int Match(){
             InfoOfToken info = GetInfoOfToken();
-            System.out.print(info.m_token+ ": ");
-            System.out.print(info.m_symbolInfo+ ": ");
-            System.out.print(m_queue.size() + ": ");
+            if(info == null) return NO_TOKEN;
             RemoveInfoOfToken();
-            System.out.print(m_queue.size() + ": ");
-            if(info == null) {
-                System.exit(-1);
-                return false;
-            }
-            String symbolInfo = info.m_symbolInfo;
-            if(symbolInfo != "number") return false;
-            return true;
+
+            if(!info.m_symbolInfo.equals("number")) return NO_MATCH;
+            return MATCH;
         }
    	};
 
@@ -77,12 +74,13 @@ public class MyRecursiveDescentParser {
     }
 
     public boolean Parse(){
-        boolean isT = false;
+        int isMatch = 0;
 
         try {
             while(true){
-                isT = number.match();
-                System.out.println(isT);
+                isMatch = number.Match();
+                System.out.println(CheckMatchingStatus(isMatch));
+                if(isMatch == NO_TOKEN) break;
             }
             // if(isT) {
             //     System.out.println("Success!");
@@ -104,6 +102,28 @@ public class MyRecursiveDescentParser {
     }
 
     public void RemoveInfoOfToken(){
-        m_queue.remove();
+        try {
+            m_queue.remove();
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+            System.exit(-1);
+        }
+    }
+
+    public int Match(String expectedToken){
+        InfoOfToken info = GetInfoOfToken();
+        if(info == null) return NO_TOKEN;
+        RemoveInfoOfToken();
+
+        if (!info.m_token.equals(expectedToken)) return NO_MATCH;
+        return MATCH;
+    }
+
+    public String CheckMatchingStatus(int matchingStatus){
+        if(matchingStatus == MATCH) return "MATCH";
+        else if(matchingStatus == NO_MATCH) return "NO_MATCH";
+        if (matchingStatus == NO_TOKEN) return "NO_TOKEN";
+        return "Wrong Status";
     }
 }
