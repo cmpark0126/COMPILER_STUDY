@@ -118,7 +118,21 @@ public class MyRecursiveDescentParser {
     }
 
     public void id(){
-        Match("user-defined id", COMPARE_WITH_SYMBOL, "We need id"); // match is clear buffer automatically, so please use carefully
+        Match("user-defined id", COMPARE_WITH_SYMBOL, "We need id");
+        if(CheckNext("(", COMPARE_WITH_TOKEN)){
+            Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
+            parameter();
+            Match(")", COMPARE_WITH_TOKEN, "We need \")\" token");
+        }
+        return;
+    }
+
+    public void literal(){
+        Match("literal", COMPARE_WITH_SYMBOL, "We need literal");
+        return;
+    }
+
+    public void parameter(){
         return;
     }
 
