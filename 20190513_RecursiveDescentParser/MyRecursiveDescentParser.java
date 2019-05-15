@@ -228,6 +228,31 @@ public class MyRecursiveDescentParser {
         return;
     }
 
+    public void forLoop(){
+        Match("for", COMPARE_WITH_TOKEN, "We need \"for\" token");
+        Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
+
+        if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) useId();
+        else if (CheckNext("var", COMPARE_WITH_TOKEN)) varDeclare();
+        Match(";", COMPARE_WITH_TOKEN, "We need \";\" token");
+        logicalExpression();
+        Match(";", COMPARE_WITH_TOKEN, "We need \";\" token");
+        if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) useId();
+        else if(CheckNext("++", COMPARE_WITH_TOKEN) || CheckNext("--", COMPARE_WITH_TOKEN)) {
+            unaryop();
+            id();
+        }
+        Match(")", COMPARE_WITH_TOKEN, "We need \")\" token");
+        if(CheckNext("{", COMPARE_WITH_TOKEN)){
+            Match("{", COMPARE_WITH_TOKEN, "We need \"{\" token");
+            stmt();
+            Match("}", COMPARE_WITH_TOKEN, "We need \"}\" token");
+        } else {
+            stmt();
+        }
+        return;
+    }
+
     public void ifLoop(){
         Match("if", COMPARE_WITH_TOKEN, "We need \"if\" token");
         Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
@@ -280,9 +305,26 @@ public class MyRecursiveDescentParser {
         expression();
     }
 
+    public boolean assignmentOp(){
+        if(CheckNext("+=", COMPARE_WITH_TOKEN))
+            Match("+=", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("-=", COMPARE_WITH_TOKEN))
+            Match("-=", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("*=", COMPARE_WITH_TOKEN))
+            Match("*=", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("*=", COMPARE_WITH_TOKEN))
+            Match("*=", COMPARE_WITH_TOKEN, null);
+        else return false;
+
+        return true;
+    }
+
     public void useId(){
         id();
-        if(!unaryop() && CheckNext("=", COMPARE_WITH_TOKEN)) valueAssign();
+        if(!unaryop()){
+            if(CheckNext("=", COMPARE_WITH_TOKEN)) valueAssign();
+            else if(assignmentOp()) expression();
+        }
     }
 
     public void stmt(){
@@ -298,6 +340,9 @@ public class MyRecursiveDescentParser {
         }
         else if(needNextStmt = CheckNext("while", COMPARE_WITH_TOKEN)) {
             whileLoop();
+        }
+        else if(needNextStmt = CheckNext("for", COMPARE_WITH_TOKEN)) {
+            forLoop();
         }
         else if(needNextStmt = CheckNext("if", COMPARE_WITH_TOKEN)) {
             ifLoop();
