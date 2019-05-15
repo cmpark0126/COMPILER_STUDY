@@ -29,9 +29,9 @@ public class MyRecursiveDescentParser {
         public int Match(){
             InfoOfToken info = GetInfoOfToken();
             if(info == null) return NO_TOKEN;
-            RemoveInfoOfToken();
 
             if(!info.m_symbolInfo.equals("number")) return NO_MATCH;
+            RemoveInfoOfToken(); // if matched we need to delete this element from queue
             return MATCH;
         }
    	};
@@ -80,13 +80,9 @@ public class MyRecursiveDescentParser {
             while(true){
                 isMatch = number.Match();
                 System.out.println(CheckMatchingStatus(isMatch));
+                RemoveInfoOfToken(); // for test
                 if(isMatch == NO_TOKEN) break;
             }
-            // if(isT) {
-            //     System.out.println("Success!");
-            // } else {
-            //     System.out.println("Something Wrong!");
-            // }
         } catch(Exception e) {
             e.printStackTrace();
             System.out.println(e);
@@ -114,9 +110,9 @@ public class MyRecursiveDescentParser {
     public int Match(String expectedToken){
         InfoOfToken info = GetInfoOfToken();
         if(info == null) return NO_TOKEN;
-        RemoveInfoOfToken();
 
         if (!info.m_token.equals(expectedToken)) return NO_MATCH;
+        RemoveInfoOfToken();
         return MATCH;
     }
 
