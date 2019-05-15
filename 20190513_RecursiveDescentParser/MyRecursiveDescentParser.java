@@ -174,12 +174,31 @@ public class MyRecursiveDescentParser {
 
     public void whileLoop(){
         Match("while", COMPARE_WITH_TOKEN, "We need \"while\" token");
-
+        Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
+        logicalExpression();
+        Match(")", COMPARE_WITH_TOKEN, "We need \")\" token");
         return;
     }
 
-    public void logicExpression(){
-        operand();
+    public boolean logicalOperator(){
+        if(CheckNext("==", COMPARE_WITH_TOKEN))
+            Match("==", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext(">", COMPARE_WITH_TOKEN))
+            Match(">", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext(">=", COMPARE_WITH_TOKEN))
+            Match(">=", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("<", COMPARE_WITH_TOKEN))
+            Match("<", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("<=", COMPARE_WITH_TOKEN))
+            Match("<=", COMPARE_WITH_TOKEN, null);
+        else return false;
+
+        return true;
+    }
+
+    public void logicalExpression(){
+        if(!operand()) Match(null, COMPARE_WITH_SYMBOL, "We need operand for logic expression"); // for error
+        if(logicalOperator()) if(!operand()) Match(null, COMPARE_WITH_SYMBOL, "We need left operand for logic expression");
     }
 
     public void stmt(){
