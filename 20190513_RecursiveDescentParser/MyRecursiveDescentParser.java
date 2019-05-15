@@ -228,6 +228,18 @@ public class MyRecursiveDescentParser {
         return;
     }
 
+    public void doWhileLoop(){
+        Match("do", COMPARE_WITH_TOKEN, "We need \"do\" token");
+        Match("{", COMPARE_WITH_TOKEN, "We need \"{\" token");
+        stmt();
+        Match("}", COMPARE_WITH_TOKEN, "We need \"}\" token");
+        Match("while", COMPARE_WITH_TOKEN, "We need \"while\" token");
+        Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
+        logicalExpression();
+        Match(")", COMPARE_WITH_TOKEN, "We need \")\" token");
+        return;
+    }
+
     public void forLoop(){
         Match("for", COMPARE_WITH_TOKEN, "We need \"for\" token");
         Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
@@ -324,13 +336,28 @@ public class MyRecursiveDescentParser {
         return true;
     }
 
-    public void logicalExpression(){
-        if(!operand()) Match(null, COMPARE_WITH_SYMBOL, "We need operand for logic expression"); // for error
-        if(logicalOperator()) if(!operand()) Match(null, COMPARE_WITH_SYMBOL, "We need left operand for logic expression");
+    public boolean booleanVal(){
+        if(CheckNext("true", COMPARE_WITH_TOKEN))
+            Match("true", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("false", COMPARE_WITH_TOKEN))
+            Match("false", COMPARE_WITH_TOKEN, null);
+        else return false;
+
+        return true;
+    }
+
+    public boolean logicalExpression(){
+        if(!booleanVal()){
+            if(!operand()) return false; // for error
+            if(logicalOperator()) if(!operand()) return false;
+
+        }
+        return true;
     }
 
     public void valueAssign(){
         Match("=", COMPARE_WITH_TOKEN, null);
+        if(booleanVal()) return;
         expression();
     }
 
@@ -369,6 +396,10 @@ public class MyRecursiveDescentParser {
         }
         else if(needNextStmt = CheckNext("while", COMPARE_WITH_TOKEN)) {
             whileLoop();
+        }
+        else if(needNextStmt = CheckNext("do", COMPARE_WITH_TOKEN)) {
+            doWhileLoop();
+            Match(";", COMPARE_WITH_TOKEN, "We need \";\" token");
         }
         else if(needNextStmt = CheckNext("for", COMPARE_WITH_TOKEN)) {
             forLoop();
