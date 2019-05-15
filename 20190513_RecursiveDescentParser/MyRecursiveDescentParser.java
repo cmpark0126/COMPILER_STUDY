@@ -21,6 +21,21 @@ abstract class EBNF {
         if(!givenValue.equals(expectedValue)) return NO_MATCH;
         return MATCH;
     }
+
+    public int ErrorCheck(int matchingStatus, InfoOfToken givenInfo, String messageForNoMatch){
+        try {
+            if(matchingStatus == NO_MATCH) throw new Exception("Token is something wrong: " + messageForNoMatch);
+            if(matchingStatus == NO_TOKEN) throw new Exception("There is a no Token!: " + messageForNoMatch);
+        } catch(Exception e) {
+            System.out.println("line num: " + givenInfo.m_curLinenum);
+            System.out.println(givenInfo.m_curLine);
+            for(int i = 0; i < givenInfo.m_endIdx - 1; i++) System.out.print(" ");
+            System.out.println("^");
+            System.out.println(e);
+            System.exit(-1);
+        }
+        return matchingStatus;
+    }
 }
 abstract class NonTerminal extends EBNF{}
 abstract class Terminal extends EBNF{}
@@ -30,6 +45,18 @@ public class MyRecursiveDescentParser {
     private LinkedList<InfoOfToken> m_queue = null;
 
     public Terminal number = new Terminal(){
+        @Override
+        public int Match(){
+            int matchingStatus = 0;
+            // number check
+            InfoOfToken info = GetInfoOfToken();
+            RemoveInfoOfToken(); // if matched we need to delete this element from queue
+            matchingStatus = ErrorCheck(Match(info.m_symbolInfo, "number"), info, "We need number token");
+            return matchingStatus;
+        }
+   	};
+
+    public Terminal jssCode = new Terminal(){
         @Override
         public int Match(){
             int matchingStatus = 0;
