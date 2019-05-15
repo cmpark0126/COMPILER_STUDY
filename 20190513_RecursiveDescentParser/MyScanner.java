@@ -170,7 +170,7 @@ public class MyScanner {
         try {
             while(true){
                 if (m_startIdx >= m_lineLength){
-                    System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
+                    // System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
 
                     do{
                         if((m_curLine = m_bufReader.readLine()) == null) return null;
