@@ -22,10 +22,10 @@ abstract class EBNF {
     }
 }
 
-abstract class Terminal extends EBNF{
+abstract class NonTerminal extends EBNF{
 }
 
-abstract class NonTerminal extends EBNF{
+abstract class Terminal extends EBNF{
     public static final int DELIMITER = -1;
     public static final int ERROR = -2;
 
@@ -53,10 +53,22 @@ abstract class NonTerminal extends EBNF{
 }
 
 public class RecursiveDescentParser {
-    public static NonTerminal number = new NonTerminal(){
+    public static Terminal number = new Terminal(){
+        public boolean IsDigit(char ch){
+            return (ch >= 48 && ch <= 57)? true : false;
+        }
+
    		@Override
    		public int nextState(char ch, int current_state){
-            return DELIMITER;
+            switch (current_state) {
+                case 0: if(ch == '-') return 1;
+                        else if(IsDigit(ch)) return 1;
+                        else return ERROR;
+                case 1: if(IsDigit(ch)) return 1;
+                        else if(ch == ' ') return DELIMITER;
+                        else return ERROR;
+                default: return ERROR;
+            }
         }
    	};
 
@@ -78,6 +90,7 @@ public class RecursiveDescentParser {
                 info = scanner.Scan();
                 if(info == null) break;
                 System.out.println(info.m_token + " : " + number.equals((Object)info.m_token));
+                System.out.println(scanner.GetCurLineNum() + " : " + scanner.GetCurLine());
             }
 
         } catch(Exception e) {

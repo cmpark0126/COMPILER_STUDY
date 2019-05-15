@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class MyScanner {
     private BufferedReader m_bufReader = null;
     private String m_curLine = "";
+    private int m_curLinenum = 0;
     private int m_lineLength = 0;
     private int m_startIdx = 0;
     private int m_endIdx = 0;
@@ -171,8 +172,8 @@ public class MyScanner {
             while(true){
                 if (m_startIdx >= m_lineLength){
                     // System.out.println("m_startIdx : " + m_startIdx + "; m_lineLength : " + m_lineLength);
-
                     do{
+                        m_curLinenum++;
                         if((m_curLine = m_bufReader.readLine()) == null) return null;
                         // m_curLine := nextLine from file pointer
                         m_lineLength = m_curLine.length(); // initialization
@@ -663,10 +664,19 @@ public class MyScanner {
         return;
     }
 
+    public String GetCurLine(){
+        return m_curLine;
+    }
+
+    public int GetCurLineNum(){
+        return m_curLinenum;
+    }
 }
 
 class InfoOfToken {
     public int m_typeOfDelimiter = 0;
     public int m_endIdx = 0;
     public String m_token = "";
+    public String m_lineWhichHasToken = "";
+    public int m_lineNum = 0;
 }
