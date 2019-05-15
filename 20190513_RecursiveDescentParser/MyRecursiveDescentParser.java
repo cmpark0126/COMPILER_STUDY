@@ -121,7 +121,7 @@ public class MyRecursiveDescentParser {
         Match("user-defined id", COMPARE_WITH_SYMBOL, "We need id");
         if(CheckNext("(", COMPARE_WITH_TOKEN)){
             Match("(", COMPARE_WITH_TOKEN, "We need \"(\" token");
-            FunctionParameter();
+            functionParameter();
             Match(")", COMPARE_WITH_TOKEN, "We need \")\" token");
         }
         return;
@@ -132,14 +132,18 @@ public class MyRecursiveDescentParser {
         return;
     }
 
-    public void FunctionParameter(){
+    public boolean operand(){
         if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
         else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
         else if(CheckNext("literal", COMPARE_WITH_SYMBOL)) literal();
+        else return false;
+        return true;
+    }
 
-        if(CheckNext(",", COMPARE_WITH_TOKEN)) {
+    public void functionParameter(){
+        if(operand() && CheckNext(",", COMPARE_WITH_TOKEN)) { // only when there is first parameter, we can check next one.
             Match(",", COMPARE_WITH_TOKEN, "We need \",\" token");
-            FunctionParameter();
+            functionParameter();
         }
         return;
     }
@@ -156,9 +160,7 @@ public class MyRecursiveDescentParser {
         while(true){
             if(CheckNext("=", COMPARE_WITH_TOKEN)) {
                 Match("=", COMPARE_WITH_TOKEN, "We need \"=\" token");
-                if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
-                else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
-                else Match(null, COMPARE_WITH_SYMBOL, "We need number or id"); // for error
+                if(!operand()) Match(null, COMPARE_WITH_SYMBOL, "We need number or id"); // for error
             } else if(CheckNext(",", COMPARE_WITH_TOKEN)) {
                 Match(",", COMPARE_WITH_TOKEN, "We need \",\" token");
                 while(CheckNext("comment", COMPARE_WITH_SYMBOL)) comment();
@@ -174,6 +176,10 @@ public class MyRecursiveDescentParser {
         Match("while", COMPARE_WITH_TOKEN, "We need \"while\" token");
 
         return;
+    }
+
+    public void logicExpression(){
+        operand();
     }
 
     public void stmt(){
