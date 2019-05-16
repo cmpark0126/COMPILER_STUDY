@@ -318,7 +318,7 @@ public class MyRecursiveDescentParser {
             operand();
             Match(":", COMPARE_WITH_TOKEN, "May We need \":\" token");
             stmt();
-        } else if(needNextStmt = CheckNext("default", COMPARE_WITH_TOKEN)) {
+        } else if(CheckNext("default", COMPARE_WITH_TOKEN)) {
             Match("default", COMPARE_WITH_TOKEN, null);
             Match(":", COMPARE_WITH_TOKEN, "May We need \":\" token");
             stmt();
@@ -378,8 +378,8 @@ public class MyRecursiveDescentParser {
             Match("-=", COMPARE_WITH_TOKEN, null);
         else if(CheckNext("*=", COMPARE_WITH_TOKEN))
             Match("*=", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("*=", COMPARE_WITH_TOKEN))
-            Match("*=", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("/=", COMPARE_WITH_TOKEN))
+            Match("/=", COMPARE_WITH_TOKEN, null);
         else return false;
 
         return true;
