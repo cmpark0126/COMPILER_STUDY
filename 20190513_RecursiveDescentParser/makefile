@@ -1,8 +1,8 @@
 main:
-	powershell "(javac .\MyRecursiveDescentParser.java)"
+	powershell "(javac .\parser1.java)"
 
 exec:
-	powershell "(java MyRecursiveDescentParser)"
+	powershell "(java parser1)"
 
 clean:
 	powershell "(Remove-Item *.class)"
