@@ -276,7 +276,7 @@ public class MyLL1Parser {
     public void elsePart(){
         if(CheckNext("else", COMPARE_WITH_TOKEN)){
             Match("else", COMPARE_WITH_TOKEN, null);
-            Match("(", COMPARE_WITH_TOKEN, "May We need {");
+            Match("{", COMPARE_WITH_TOKEN, "May We need {");
             stmtSquence();
             Match("}", COMPARE_WITH_TOKEN, "May We need }");
         }
@@ -306,16 +306,17 @@ public class MyLL1Parser {
         else if (CheckNext("if", COMPARE_WITH_TOKEN)) {
             ifStmt();
         }
-        else {
-            Match(null, COMPARE_WITH_SYMBOL, "There is no matching pattern for stmt");
-        }
 
         return;
     }
 
     public void stmtSquence(){
-        stmt();
-        if(!CheckNext("<script_end>", COMPARE_WITH_TOKEN)) stmtSquence();
+        if(CheckNext("var", COMPARE_WITH_TOKEN) ||
+           CheckNext("user-defined id", COMPARE_WITH_SYMBOL) ||
+           CheckNext("if", COMPARE_WITH_TOKEN)) {
+               stmt();
+               stmtSquence();
+           }
         return;
     }
 
