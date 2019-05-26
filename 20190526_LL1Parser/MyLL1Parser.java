@@ -111,337 +111,34 @@ public class MyLL1Parser {
         return givenValue.equals(expectedValue);
     }
 
-    public void number(){
-        Match("number", COMPARE_WITH_SYMBOL, "May We need number"); // match is clear buffer automatically, so please use carefully
+    public void varDeclare(){
+        Match("var", COMPARE_WITH_TOKEN, null);
+        boolean needNextStmt = false;
+
         return;
     }
 
-    public void id(){
-        Match("user-defined id", COMPARE_WITH_SYMBOL, "May We need id");
-        if(CheckNext("(", COMPARE_WITH_TOKEN)){
-            Match("(", COMPARE_WITH_TOKEN, "May We need \"(\" token");
-            functionParameter();
-            Match(")", COMPARE_WITH_TOKEN, "May We need \")\" token");
+
+    public void stmt(){
+        if(CheckNext("var", COMPARE_WITH_TOKEN)) {
+            varDeclare();
+            Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
         }
-        return;
-    }
-
-    public void literal(){
-        Match("literal", COMPARE_WITH_SYMBOL, "May We need literal");
-        return;
-    }
-
-    public boolean operand(){
-        if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
-        else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
-        else if(CheckNext("literal", COMPARE_WITH_SYMBOL)) literal();
-        else return false;
-        return true;
-    }
-
-    public void functionParameter(){
-        if(operand() && CheckNext(",", COMPARE_WITH_TOKEN)) { // only when there is first parameter, we can check next one.
-            Match(",", COMPARE_WITH_TOKEN, "May We need \",\" token");
-            functionParameter();
+        else {
+            Match(null, COMPARE_WITH_SYMBOL, "There is no matching pattern for stmt");
         }
+
+        return;
+    }
+
+    public void stmtSquence(){
+        stmt();
+        if(!CheckNext("<script_end>", COMPARE_WITH_TOKEN)) stmt();
         return;
     }
 
     public void comment(){
         Match("comment", COMPARE_WITH_SYMBOL, "May We need comment");
-        return;
-    }
-
-    public boolean factor(){
-        if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
-        else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
-        else return false;
-        return true;
-    }
-
-    public boolean mulop(){
-        if(CheckNext("*", COMPARE_WITH_TOKEN)) Match("*", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("/", COMPARE_WITH_TOKEN)) Match("/", COMPARE_WITH_TOKEN, null);
-        else return false;
-        return true;
-    }
-
-    public void term(){
-        if(operand() && mulop()){
-            operand();
-        }
-    }
-
-    public boolean addop(){
-        if(CheckNext("+", COMPARE_WITH_TOKEN)) Match("+", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("-", COMPARE_WITH_TOKEN)) Match("-", COMPARE_WITH_TOKEN, null);
-        else return false;
-        return true;
-    }
-
-    public boolean unaryop(){
-        if(CheckNext("++", COMPARE_WITH_TOKEN)) Match("++", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("--", COMPARE_WITH_TOKEN)) Match("--", COMPARE_WITH_TOKEN, null);
-        else return false;
-        return true;
-    }
-
-    public void expression(){
-        term();
-        if(addop()){
-            term();
-        }
-    }
-
-    public void varDeclare() {
-        Match("var", COMPARE_WITH_TOKEN, "May We need \"var\" token");
-        id();
-
-        while(true){
-            if(CheckNext("=", COMPARE_WITH_TOKEN)) {
-                Match("=", COMPARE_WITH_TOKEN, "May We need \"=\" token");
-                if(!operand()) Match(null, COMPARE_WITH_SYMBOL, "May We need number or id"); // for error
-            } else if(CheckNext(",", COMPARE_WITH_TOKEN)) {
-                Match(",", COMPARE_WITH_TOKEN, "May We need \",\" token");
-                while(CheckNext("comment", COMPARE_WITH_SYMBOL)) comment();
-                id();
-            } else break;
-        }
-
-        return;
-    }
-
-    public void functionDeclare() {
-        Match("function", COMPARE_WITH_TOKEN, "May We need \"function\" token");
-        id();
-
-        Match("{", COMPARE_WITH_TOKEN, "May We need \"{\" token");
-        stmt();
-        Match("}", COMPARE_WITH_TOKEN, "May We need \"}\" token");
-
-        return;
-    }
-
-    public void whileLoop(){
-        Match("while", COMPARE_WITH_TOKEN, "May We need \"while\" token");
-        Match("(", COMPARE_WITH_TOKEN, "May We need \"(\" token");
-        logicalExpression();
-        Match(")", COMPARE_WITH_TOKEN, "May We need \")\" token");
-        if(CheckNext("{", COMPARE_WITH_TOKEN)){
-            Match("{", COMPARE_WITH_TOKEN, "May We need \"{\" token");
-            stmt();
-            Match("}", COMPARE_WITH_TOKEN, "May We need \"}\" token");
-        } else {
-            stmt();
-        }
-        return;
-    }
-
-    public void doWhileLoop(){
-        Match("do", COMPARE_WITH_TOKEN, "May We need \"do\" token");
-        Match("{", COMPARE_WITH_TOKEN, "May We need \"{\" token");
-        stmt();
-        Match("}", COMPARE_WITH_TOKEN, "May We need \"}\" token");
-        Match("while", COMPARE_WITH_TOKEN, "May We need \"while\" token");
-        Match("(", COMPARE_WITH_TOKEN, "May We need \"(\" token");
-        logicalExpression();
-        Match(")", COMPARE_WITH_TOKEN, "May We need \")\" token");
-        return;
-    }
-
-    public void forLoop(){
-        Match("for", COMPARE_WITH_TOKEN, "May We need \"for\" token");
-        Match("(", COMPARE_WITH_TOKEN, "May We need \"(\" token");
-
-        if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) useId();
-        else if (CheckNext("var", COMPARE_WITH_TOKEN)) varDeclare();
-        Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
-        logicalExpression();
-        Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
-        if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) useId();
-        else if(CheckNext("++", COMPARE_WITH_TOKEN) || CheckNext("--", COMPARE_WITH_TOKEN)) {
-            unaryop();
-            id();
-        }
-        Match(")", COMPARE_WITH_TOKEN, "May We need \")\" token");
-        if(CheckNext("{", COMPARE_WITH_TOKEN)){
-            Match("{", COMPARE_WITH_TOKEN, "May We need \"{\" token");
-            stmt();
-            Match("}", COMPARE_WITH_TOKEN, "May We need \"}\" token");
-        } else {
-            stmt();
-        }
-        return;
-    }
-
-    public void ifLoop(){
-        Match("if", COMPARE_WITH_TOKEN, "May We need \"if\" token");
-        Match("(", COMPARE_WITH_TOKEN, "May We need \"(\" token");
-        logicalExpression();
-        Match(")", COMPARE_WITH_TOKEN, "May We need \")\" token");
-        if(CheckNext("{", COMPARE_WITH_TOKEN)){
-            Match("{", COMPARE_WITH_TOKEN, "May We need \"{\" token");
-            stmt();
-            Match("}", COMPARE_WITH_TOKEN, "May We need \"}\" token");
-        } else {
-            stmt();
-        }
-
-        if(CheckNext("else", COMPARE_WITH_TOKEN)){
-            Match("else", COMPARE_WITH_TOKEN, null);
-            if(CheckNext("{", COMPARE_WITH_TOKEN)){
-                Match("{", COMPARE_WITH_TOKEN, "May We need \"{\" token");
-                stmt();
-                Match("}", COMPARE_WITH_TOKEN, "May We need \"}\" token");
-            } else {
-                stmt();
-            }
-        }
-        return;
-    }
-
-    public void switchStmt(){
-        Match("switch", COMPARE_WITH_TOKEN, "May We need \"switch\" token");
-        Match("(", COMPARE_WITH_TOKEN, "May We need \"(\" token");
-        expression();
-        Match(")", COMPARE_WITH_TOKEN, "May We need \")\" token");
-        Match("{", COMPARE_WITH_TOKEN, "May We need \"{\" token");
-        caseStmt();
-        Match("}", COMPARE_WITH_TOKEN, "May We need \"}\" token");
-        return;
-    }
-
-    public void caseStmt(){
-        boolean needNextStmt = false;
-        if(needNextStmt = CheckNext("case", COMPARE_WITH_TOKEN)){
-            Match("case", COMPARE_WITH_TOKEN, null);
-            operand();
-            Match(":", COMPARE_WITH_TOKEN, "May We need \":\" token");
-            stmt();
-        } else if(CheckNext("default", COMPARE_WITH_TOKEN)) {
-            Match("default", COMPARE_WITH_TOKEN, null);
-            Match(":", COMPARE_WITH_TOKEN, "May We need \":\" token");
-            stmt();
-        }
-
-        if(needNextStmt) caseStmt();
-
-        return;
-    }
-
-    public boolean logicalOperator(){
-        if(CheckNext("==", COMPARE_WITH_TOKEN))
-            Match("==", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext(">", COMPARE_WITH_TOKEN))
-            Match(">", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext(">=", COMPARE_WITH_TOKEN))
-            Match(">=", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("<", COMPARE_WITH_TOKEN))
-            Match("<", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("<=", COMPARE_WITH_TOKEN))
-            Match("<=", COMPARE_WITH_TOKEN, null);
-        else return false;
-
-        return true;
-    }
-
-    public boolean booleanVal(){
-        if(CheckNext("true", COMPARE_WITH_TOKEN))
-            Match("true", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("false", COMPARE_WITH_TOKEN))
-            Match("false", COMPARE_WITH_TOKEN, null);
-        else return false;
-
-        return true;
-    }
-
-    public boolean logicalExpression(){
-        if(!booleanVal()){
-            if(!operand()) return false; // for error
-            else {
-                if(logicalOperator()) if(!operand()) Match(null, COMPARE_WITH_SYMBOL, "May We need operand"); // for error
-            }
-        }
-        return true;
-    }
-
-    public void valueAssign(){
-        Match("=", COMPARE_WITH_TOKEN, null);
-        if(booleanVal()) return;
-        expression();
-    }
-
-    public boolean assignmentOp(){
-        if(CheckNext("+=", COMPARE_WITH_TOKEN))
-            Match("+=", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("-=", COMPARE_WITH_TOKEN))
-            Match("-=", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("*=", COMPARE_WITH_TOKEN))
-            Match("*=", COMPARE_WITH_TOKEN, null);
-        else if(CheckNext("/=", COMPARE_WITH_TOKEN))
-            Match("/=", COMPARE_WITH_TOKEN, null);
-        else return false;
-
-        return true;
-    }
-
-    public void useId(){
-        id();
-        if(!unaryop()){
-            if(CheckNext("=", COMPARE_WITH_TOKEN)) valueAssign();
-            else if(assignmentOp()) expression();
-        }
-    }
-
-    public void stmt(){
-        boolean needNextStmt = false;
-
-        if(needNextStmt = CheckNext("var", COMPARE_WITH_TOKEN)) {
-            varDeclare();
-            Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
-        }
-        else if(needNextStmt = CheckNext("function", COMPARE_WITH_TOKEN)) {
-            functionDeclare();
-        }
-        else if(needNextStmt = CheckNext("while", COMPARE_WITH_TOKEN)) {
-            whileLoop();
-        }
-        else if(needNextStmt = CheckNext("do", COMPARE_WITH_TOKEN)) {
-            doWhileLoop();
-            Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
-        }
-        else if(needNextStmt = CheckNext("for", COMPARE_WITH_TOKEN)) {
-            forLoop();
-        }
-        else if(needNextStmt = CheckNext("if", COMPARE_WITH_TOKEN)) {
-            ifLoop();
-        }
-        else if(needNextStmt = CheckNext("switch", COMPARE_WITH_TOKEN)) {
-            switchStmt();
-        }
-        else if(needNextStmt = CheckNext("break", COMPARE_WITH_TOKEN)) {
-            Match("break", COMPARE_WITH_TOKEN, null);
-            Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
-        }
-        else if(needNextStmt = CheckNext("return", COMPARE_WITH_TOKEN)) {
-            Match("return", COMPARE_WITH_TOKEN, null);
-            expression();
-            Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
-        }
-        else if(needNextStmt = unaryop()) {
-            id();
-            Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
-        }
-        else if(needNextStmt = CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) {
-            useId();
-            Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
-        }
-        else if(needNextStmt = CheckNext("comment", COMPARE_WITH_SYMBOL)) {
-            comment();
-        }
-
-        if(needNextStmt) stmt();
-
         return;
     }
 
@@ -457,7 +154,7 @@ public class MyLL1Parser {
     public void jsscode(){
         initialComment();
         Match("<script_start>", COMPARE_WITH_TOKEN, "May We need \"<script_start>\" token");
-        stmt();
+        stmtSquence();
         Match("<script_end>", COMPARE_WITH_TOKEN, "May We need \"<script_end>\" token");
         return;
     }

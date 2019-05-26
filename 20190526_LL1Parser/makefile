@@ -1,8 +1,8 @@
 main:
-	powershell "(javac .\parser1.java)"
+	powershell "(javac .\LL1.java)"
 
 exec:
-	powershell "(java parser1)"
+	powershell "(java LL1)"
 
 clean:
 	powershell "(Remove-Item *.class)"

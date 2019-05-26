@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 
-public class parser1 {
+public class LL1 {
     public static void main(String[] args) {
         // Scanner kb = new Scanner(System.in);
         String filename = "";
@@ -32,7 +32,7 @@ public class parser1 {
             System.out.println("Complete Parse!");
 
         } catch(Exception e) {
-            System.out.println("Usage : java parser1 [FILE_NAME]");
+            System.out.println("Usage : java LL1 [FILE_NAME]");
             System.exit(-1);
         }
 
