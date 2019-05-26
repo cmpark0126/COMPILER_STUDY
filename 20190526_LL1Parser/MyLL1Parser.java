@@ -353,6 +353,62 @@ public class MyLL1Parser {
         return;
     }
 
+    public void switchStmt(){
+        Match("switch", COMPARE_WITH_TOKEN, "May We need switch");
+        Match("(", COMPARE_WITH_TOKEN, "May We need (");
+        exp();
+        Match(")", COMPARE_WITH_TOKEN, "May We need )");
+        Match("{", COMPARE_WITH_TOKEN, "May We need {");
+        switchStmtSequence();
+        Match("}", COMPARE_WITH_TOKEN, "May We need }");
+        return;
+    }
+
+    public void switchStmtSequence(){
+        if(CheckNext("case", COMPARE_WITH_TOKEN) ||
+           CheckNext("default", COMPARE_WITH_TOKEN)) {
+               caseStmtSequence();
+               defaultStmt();
+           }
+        return;
+    }
+
+    public void caseStmtSequence(){
+        if(CheckNext("case", COMPARE_WITH_TOKEN)) {
+               caseStmt();
+               caseStmtSequence();
+           }
+        return;
+    }
+
+    public void caseSymbol(){
+        if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
+        else if(CheckNext("literal", COMPARE_WITH_SYMBOL)) literal();
+        return;
+    }
+
+    public void caseStmt(){
+        Match("case", COMPARE_WITH_TOKEN, null);
+        if(CheckNext("number", COMPARE_WITH_SYMBOL) ||
+            CheckNext("literal", COMPARE_WITH_SYMBOL)) caseSymbol();
+        else Match(null, COMPARE_WITH_TOKEN, "may we need case symbol");
+        Match(":", COMPARE_WITH_TOKEN, "may we need :");
+        stmtSquence();
+        return;
+    }
+
+    public void defaultStmt(){
+        Match("default", COMPARE_WITH_TOKEN, "may we need default stmt");
+        Match(":", COMPARE_WITH_TOKEN, "may we need \":\"");
+        stmtSquence();
+        return;
+    }
+
+    public void breakStmt(){
+        Match("break", COMPARE_WITH_TOKEN, "may we need break");
+        return;
+    }
+
     public void stmt(){
         if(CheckNext("var", COMPARE_WITH_TOKEN)) {
             varDeclare();
@@ -371,6 +427,13 @@ public class MyLL1Parser {
         else if (CheckNext("for", COMPARE_WITH_TOKEN)) {
             forLoop();
         }
+        else if (CheckNext("switch", COMPARE_WITH_TOKEN)) {
+            switchStmt();
+        }
+        else if (CheckNext("break", COMPARE_WITH_TOKEN)) {
+            breakStmt();
+            Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
+        }
 
         return;
     }
@@ -380,7 +443,9 @@ public class MyLL1Parser {
            CheckNext("user-defined id", COMPARE_WITH_SYMBOL) ||
            CheckNext("if", COMPARE_WITH_TOKEN) ||
            CheckNext("while", COMPARE_WITH_TOKEN) ||
-           CheckNext("for", COMPARE_WITH_TOKEN)) {
+           CheckNext("for", COMPARE_WITH_TOKEN) ||
+           CheckNext("switch", COMPARE_WITH_TOKEN) ||
+           CheckNext("break", COMPARE_WITH_TOKEN)) {
                stmt();
                stmtSquence();
            }
