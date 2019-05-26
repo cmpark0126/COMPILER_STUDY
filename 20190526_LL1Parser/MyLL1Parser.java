@@ -293,8 +293,17 @@ public class MyLL1Parser {
            CheckNext("<", COMPARE_WITH_TOKEN) ||
            CheckNext("<=", COMPARE_WITH_TOKEN)){
             logicalop();
-            logicalFactor();
+            if(CheckNext("(", COMPARE_WITH_TOKEN) ||
+               CheckNext("number", COMPARE_WITH_SYMBOL) ||
+               CheckNext("user-defined id", COMPARE_WITH_SYMBOL) ||
+               CheckNext("literal", COMPARE_WITH_SYMBOL) ||
+               CheckNext("true", COMPARE_WITH_TOKEN) ||
+               CheckNext("false", COMPARE_WITH_TOKEN)){
+                   logicalFactor();
+             }
+             else Match(null, COMPARE_WITH_TOKEN, "there is missing token");
         }
+
     }
 
     public void elsePart(){
@@ -318,10 +327,25 @@ public class MyLL1Parser {
         return;
     }
 
-    public void whileStmt(){
+    public void whileLoop(){
         Match("while", COMPARE_WITH_TOKEN, null);
         Match("(", COMPARE_WITH_TOKEN, "May We need (");
         logicalExp();
+        Match(")", COMPARE_WITH_TOKEN, "May We need )");
+        Match("{", COMPARE_WITH_TOKEN, "May We need {");
+        stmtSquence();
+        Match("}", COMPARE_WITH_TOKEN, "May We need }");
+        return;
+    }
+
+    public void forLoop(){
+        Match("for", COMPARE_WITH_TOKEN, null);
+        Match("(", COMPARE_WITH_TOKEN, "May We need (");
+        idAssign();
+        Match(";", COMPARE_WITH_TOKEN, "May We need ;");
+        logicalExp();
+        Match(";", COMPARE_WITH_TOKEN, "May We need ;");
+        idAssign();
         Match(")", COMPARE_WITH_TOKEN, "May We need )");
         Match("{", COMPARE_WITH_TOKEN, "May We need {");
         stmtSquence();
@@ -342,7 +366,10 @@ public class MyLL1Parser {
             ifStmt();
         }
         else if (CheckNext("while", COMPARE_WITH_TOKEN)) {
-            whileStmt();
+            whileLoop();
+        }
+        else if (CheckNext("for", COMPARE_WITH_TOKEN)) {
+            forLoop();
         }
 
         return;
@@ -352,7 +379,8 @@ public class MyLL1Parser {
         if(CheckNext("var", COMPARE_WITH_TOKEN) ||
            CheckNext("user-defined id", COMPARE_WITH_SYMBOL) ||
            CheckNext("if", COMPARE_WITH_TOKEN) ||
-           CheckNext("while", COMPARE_WITH_TOKEN)) {
+           CheckNext("while", COMPARE_WITH_TOKEN) ||
+           CheckNext("for", COMPARE_WITH_TOKEN)) {
                stmt();
                stmtSquence();
            }
