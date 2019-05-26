@@ -7,7 +7,7 @@ limit = limit + fan;
 if(temperature > limit )
 {
     temperature = 20;
-    limit = limit – 5;
+    limit = limit - 5;
 }
 else
 {

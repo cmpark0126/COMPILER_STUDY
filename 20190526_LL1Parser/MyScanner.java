@@ -182,7 +182,7 @@ public class MyScanner {
                     } while(m_lineLength <= 0);
                     m_specialState = IS_FIRST_TOKEN_CURRENT_LINE;
                 }
-                info = Scan(m_curLine, m_startIdx, m_endIdx, m_specialState);
+                info = Scan(m_curLine, m_startIdx, m_endIdx, m_specialState, m_curLinenum);
 
                 // select action as per dilimiter and curren special state
                 m_typeOfDelimiter = info.m_typeOfDelimiter;
@@ -226,7 +226,7 @@ public class MyScanner {
         return info;
     }
 
-    public static InfoOfToken Scan(String line, int startIdx, int endIdx, int specialState){
+    public static InfoOfToken Scan(String line, int startIdx, int endIdx, int specialState, int linenum){
         int sizeOfLine = line.length();
         int curState = 0;
         InfoOfToken info = null;
@@ -242,6 +242,7 @@ public class MyScanner {
                 if((curState / DIVISOR) == LOOP_BREAKER) { // special state case check
                     if(curState == ERROR){
                         System.out.println("Scanner Error!");
+                        System.out.println("line num: " + linenum);
                         System.out.println(line.substring(startIdx, endIdx + 1) + " is Rejected!");
                         System.exit(-1);
                     }
