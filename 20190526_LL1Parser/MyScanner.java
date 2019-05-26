@@ -93,6 +93,7 @@ public class MyScanner {
             m_reservedSymbolMap.put("<script_end>","script end keyword");
             m_reservedSymbolMap.put("var","keyword");
             m_reservedSymbolMap.put("function","keyword");
+            m_reservedSymbolMap.put("document.writeln","user-defined id");
 
             // use for special statement
             m_reservedSymbolMap.put("if","if keyword");
