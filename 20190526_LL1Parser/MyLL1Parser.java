@@ -132,6 +132,11 @@ public class MyLL1Parser {
     }
 
     public void factor(){
+        if(CheckNext("(", COMPARE_WITH_TOKEN)) {
+            Match("(", COMPARE_WITH_TOKEN, null);
+            exp();
+            Match(")", COMPARE_WITH_TOKEN, "May We need )");
+        }
         if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
         else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
         else if(CheckNext("literal", COMPARE_WITH_SYMBOL)) literal();
@@ -220,6 +225,75 @@ public class MyLL1Parser {
         return;
     }
 
+    public void logicalop(){
+        if(CheckNext("==", COMPARE_WITH_TOKEN))
+            Match("==", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext(">", COMPARE_WITH_TOKEN))
+            Match(">", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext(">=", COMPARE_WITH_TOKEN))
+            Match(">=", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("<", COMPARE_WITH_TOKEN))
+            Match("<", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("<=", COMPARE_WITH_TOKEN))
+            Match("<=", COMPARE_WITH_TOKEN, null);
+        return;
+    }
+
+    public void booleanVal(){
+        if(CheckNext("true", COMPARE_WITH_TOKEN))
+            Match("true", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("false", COMPARE_WITH_TOKEN))
+            Match("false", COMPARE_WITH_TOKEN, null);
+        return;
+    }
+
+    public void logicalFactor(){
+        if(CheckNext("(", COMPARE_WITH_TOKEN)) {
+            Match("(", COMPARE_WITH_TOKEN, null);
+            logicalExp();
+            Match(")", COMPARE_WITH_TOKEN, "May We need )");
+        }
+        if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
+        else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
+        else if(CheckNext("literal", COMPARE_WITH_SYMBOL)) literal();
+        else if(CheckNext("true", COMPARE_WITH_TOKEN) || CheckNext("false", COMPARE_WITH_TOKEN)) booleanVal();
+
+        return;
+    }
+
+    public void logicalExp(){
+        logicalFactor();
+        if(CheckNext("==", COMPARE_WITH_TOKEN) ||
+           CheckNext(">", COMPARE_WITH_TOKEN) ||
+           CheckNext(">=", COMPARE_WITH_TOKEN) ||
+           CheckNext("<", COMPARE_WITH_TOKEN) ||
+           CheckNext("<=", COMPARE_WITH_TOKEN)){
+            logicalop();
+            logicalFactor();
+        }
+    }
+
+    public void elsePart(){
+        if(CheckNext("else", COMPARE_WITH_TOKEN)){
+            Match("else", COMPARE_WITH_TOKEN, null);
+            Match("(", COMPARE_WITH_TOKEN, "May We need {");
+            stmtSquence();
+            Match("}", COMPARE_WITH_TOKEN, "May We need }");
+        }
+    }
+
+    public void ifStmt(){
+        Match("if", COMPARE_WITH_TOKEN, null);
+        Match("(", COMPARE_WITH_TOKEN, "May We need (");
+        logicalExp();
+        Match(")", COMPARE_WITH_TOKEN, "May We need )");
+        Match("{", COMPARE_WITH_TOKEN, "May We need {");
+        stmtSquence();
+        Match("}", COMPARE_WITH_TOKEN, "May We need }");
+        elsePart();
+        return;
+    }
+
     public void stmt(){
         if(CheckNext("var", COMPARE_WITH_TOKEN)) {
             varDeclare();
@@ -228,6 +302,9 @@ public class MyLL1Parser {
         else if (CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) {
             idAssign();
             Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
+        }
+        else if (CheckNext("if", COMPARE_WITH_TOKEN)) {
+            ifStmt();
         }
         else {
             Match(null, COMPARE_WITH_SYMBOL, "There is no matching pattern for stmt");
