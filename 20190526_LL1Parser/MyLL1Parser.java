@@ -343,8 +343,13 @@ public class MyLL1Parser {
     }
 
     public InfoOfToken GetInfoOfToken(){
-        if(m_queue.size() == 0) m_queue.add(m_scanner.Scan());
-        InfoOfToken temp = m_queue.peek();
+        InfoOfToken temp = null;
+        while(true){
+            if(m_queue.size() == 0) m_queue.add(m_scanner.Scan());
+            temp = m_queue.peek();
+            if(temp.m_symbolInfo.equals("comment")) m_queue.remove();
+            else break;
+        }
         if(temp == null) temp = new InfoOfToken();
         return temp;
     }
