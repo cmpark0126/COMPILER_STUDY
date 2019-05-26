@@ -111,17 +111,122 @@ public class MyLL1Parser {
         return givenValue.equals(expectedValue);
     }
 
-    public void varDeclare(){
-        Match("var", COMPARE_WITH_TOKEN, null);
-        boolean needNextStmt = false;
+    public void number(){
+        Match("number", COMPARE_WITH_SYMBOL, "May We need number"); // match is clear buffer automatically, so please use carefully
+        return;
+    }
+
+    public void id(){
+        Match("user-defined id", COMPARE_WITH_SYMBOL, "May We need id");
+        // if(CheckNext("(", COMPARE_WITH_TOKEN)){
+        //     Match("(", COMPARE_WITH_TOKEN, "May We need \"(\" token");
+        //     functionParameter();
+        //     Match(")", COMPARE_WITH_TOKEN, "May We need \")\" token");
+        // }
+        return;
+    }
+
+    public void literal(){
+        Match("literal", COMPARE_WITH_SYMBOL, "May We need literal");
+        return;
+    }
+
+    public void factor(){
+        if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
+        else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
+        else if(CheckNext("literal", COMPARE_WITH_SYMBOL)) literal();
+        return;
+    }
+
+    public void mulop(){
+        if(CheckNext("*", COMPARE_WITH_TOKEN)) Match("*", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("/", COMPARE_WITH_TOKEN)) Match("/", COMPARE_WITH_TOKEN, null);
+        return;
+    }
+
+    public void term(){
+        factor();
+        if(CheckNext("*", COMPARE_WITH_TOKEN) ||
+           CheckNext("/", COMPARE_WITH_TOKEN)){
+            mulop();
+            factor();
+        }
+    }
+
+    public void addop(){
+        if(CheckNext("+", COMPARE_WITH_TOKEN)) Match("+", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("-", COMPARE_WITH_TOKEN)) Match("-", COMPARE_WITH_TOKEN, null);
+        return;
+    }
+
+    public void exp(){
+        term();
+        if(CheckNext("+", COMPARE_WITH_TOKEN) ||
+           CheckNext("-", COMPARE_WITH_TOKEN)){
+            addop();
+            term();
+        }
+    }
+
+    public void varDeclaereId(){
+        id();
+        return;
+    }
+
+    public void varDeclaereIdAssign(){
+        varDeclaereId();
+        if(CheckNext("=", COMPARE_WITH_TOKEN)){
+            Match("=", COMPARE_WITH_TOKEN, null);
+            exp();
+        }
 
         return;
     }
 
+    public void varDeclaereIdAssignSequence(){
+        if(CheckNext(",", COMPARE_WITH_TOKEN)) {
+            Match(",", COMPARE_WITH_TOKEN, null);
+            varDeclaereIdAssign();
+            varDeclaereIdAssignSequence();
+        }
+
+        return;
+    }
+
+    public void varDeclare(){
+        Match("var", COMPARE_WITH_TOKEN, null);
+        varDeclaereIdAssign();
+        varDeclaereIdAssignSequence();
+
+        return;
+    }
+
+    public void unaryop(){
+        if(CheckNext("++", COMPARE_WITH_TOKEN)) Match("++", COMPARE_WITH_TOKEN, null);
+        else if(CheckNext("--", COMPARE_WITH_TOKEN)) Match("--", COMPARE_WITH_TOKEN, null);
+        return;
+    }
+
+    public void idAssign(){
+        id();
+        if(CheckNext("=", COMPARE_WITH_TOKEN)){
+            Match("=", COMPARE_WITH_TOKEN, null);
+            exp();
+        } else if (CheckNext("++", COMPARE_WITH_TOKEN)||
+                   CheckNext("--", COMPARE_WITH_TOKEN)){
+            unaryop();
+        }
+
+        return;
+    }
 
     public void stmt(){
         if(CheckNext("var", COMPARE_WITH_TOKEN)) {
             varDeclare();
+            Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
+        }
+        else if (CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) {
+            idAssign();
             Match(";", COMPARE_WITH_TOKEN, "May We need \";\" token");
         }
         else {
@@ -133,7 +238,7 @@ public class MyLL1Parser {
 
     public void stmtSquence(){
         stmt();
-        if(!CheckNext("<script_end>", COMPARE_WITH_TOKEN)) stmt();
+        if(!CheckNext("<script_end>", COMPARE_WITH_TOKEN)) stmtSquence();
         return;
     }
 
