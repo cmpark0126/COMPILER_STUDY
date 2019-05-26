@@ -117,6 +117,16 @@ public class MyLL1Parser {
     }
 
     public void id(){
+        id(false);
+        return;
+    }
+
+    public void id(boolean isMustFirstShowing){
+        InfoOfToken info = GetInfoOfToken();
+        if(info.firstShowing != isMustFirstShowing) {
+            if(isMustFirstShowing) Match(null, COMPARE_WITH_SYMBOL, "this id is undefined");
+            else Match(null, COMPARE_WITH_SYMBOL, "this id is already defined");
+        }
         Match("user-defined id", COMPARE_WITH_SYMBOL, "May We need id");
         if(CheckNext("(", COMPARE_WITH_TOKEN)){
             Match("(", COMPARE_WITH_TOKEN, null);
@@ -188,7 +198,7 @@ public class MyLL1Parser {
     }
 
     public void varDeclaereId(){
-        id();
+        id(true);
         return;
     }
 
