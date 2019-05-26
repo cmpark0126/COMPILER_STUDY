@@ -349,22 +349,7 @@ public class MyLL1Parser {
         return;
     }
 
-    public void comment(){
-        Match("comment", COMPARE_WITH_SYMBOL, "May We need comment");
-        return;
-    }
-
-    public void initialComment(){
-        boolean needNextStmt = false;
-        if(needNextStmt = CheckNext("comment", COMPARE_WITH_SYMBOL)) {
-            comment();
-        }
-        if(needNextStmt) initialComment();
-        return;
-    }
-
     public void jsscode(){
-        initialComment();
         Match("<script_start>", COMPARE_WITH_TOKEN, "May We need \"<script_start>\" token");
         stmtSquence();
         Match("<script_end>", COMPARE_WITH_TOKEN, "May We need \"<script_end>\" token");
