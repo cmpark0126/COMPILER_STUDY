@@ -118,11 +118,13 @@ public class MyLL1Parser {
 
     public void id(){
         Match("user-defined id", COMPARE_WITH_SYMBOL, "May We need id");
-        // if(CheckNext("(", COMPARE_WITH_TOKEN)){
-        //     Match("(", COMPARE_WITH_TOKEN, "May We need \"(\" token");
-        //     functionParameter();
-        //     Match(")", COMPARE_WITH_TOKEN, "May We need \")\" token");
-        // }
+        if(CheckNext("(", COMPARE_WITH_TOKEN)){
+            Match("(", COMPARE_WITH_TOKEN, null);
+            if(CheckNext("number", COMPARE_WITH_SYMBOL) ||
+               CheckNext("user-defined id", COMPARE_WITH_SYMBOL) ||
+               CheckNext("literal", COMPARE_WITH_SYMBOL)) functionParameter();
+            Match(")", COMPARE_WITH_TOKEN, "May We need \")\" token");
+        }
         return;
     }
 
@@ -140,6 +142,18 @@ public class MyLL1Parser {
         if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
         else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
         else if(CheckNext("literal", COMPARE_WITH_SYMBOL)) literal();
+        return;
+    }
+
+    public void functionParameter(){
+        if(CheckNext("number", COMPARE_WITH_SYMBOL)) number();
+        else if(CheckNext("user-defined id", COMPARE_WITH_SYMBOL)) id();
+        else if(CheckNext("literal", COMPARE_WITH_SYMBOL)) literal();
+        else Match(null, COMPARE_WITH_SYMBOL, "May We need number or id or literal");
+        if(CheckNext(",", COMPARE_WITH_TOKEN)) {
+            Match(",", COMPARE_WITH_TOKEN, null);
+            functionParameter();
+        }
         return;
     }
 
@@ -294,6 +308,17 @@ public class MyLL1Parser {
         return;
     }
 
+    public void whileStmt(){
+        Match("while", COMPARE_WITH_TOKEN, null);
+        Match("(", COMPARE_WITH_TOKEN, "May We need (");
+        logicalExp();
+        Match(")", COMPARE_WITH_TOKEN, "May We need )");
+        Match("{", COMPARE_WITH_TOKEN, "May We need {");
+        stmtSquence();
+        Match("}", COMPARE_WITH_TOKEN, "May We need }");
+        return;
+    }
+
     public void stmt(){
         if(CheckNext("var", COMPARE_WITH_TOKEN)) {
             varDeclare();
@@ -306,6 +331,9 @@ public class MyLL1Parser {
         else if (CheckNext("if", COMPARE_WITH_TOKEN)) {
             ifStmt();
         }
+        else if (CheckNext("while", COMPARE_WITH_TOKEN)) {
+            whileStmt();
+        }
 
         return;
     }
@@ -313,7 +341,8 @@ public class MyLL1Parser {
     public void stmtSquence(){
         if(CheckNext("var", COMPARE_WITH_TOKEN) ||
            CheckNext("user-defined id", COMPARE_WITH_SYMBOL) ||
-           CheckNext("if", COMPARE_WITH_TOKEN)) {
+           CheckNext("if", COMPARE_WITH_TOKEN) ||
+           CheckNext("while", COMPARE_WITH_TOKEN)) {
                stmt();
                stmtSquence();
            }
@@ -347,6 +376,7 @@ public class MyLL1Parser {
         while(true){
             if(m_queue.size() == 0) m_queue.add(m_scanner.Scan());
             temp = m_queue.peek();
+            // remove comment token automatically
             if(temp.m_symbolInfo.equals("comment")) m_queue.remove();
             else break;
         }
