@@ -6,4 +6,5 @@ public class InfoOfToken {
     public String m_symbolInfo = null;
     public String m_curLine = null;
     public int m_curLinenum = 0;
+    public boolean firstShowing = false;
 }

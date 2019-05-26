@@ -58,7 +58,7 @@ public class MyScanner {
             while(true) {
                 info = scanner.Scan();
                 if(info == null) break;
-                scanner.AnalyzeToken(info.m_token, info.m_typeOfDelimiter);
+                scanner.AnalyzeToken(info.m_token, info.m_typeOfDelimiter, info);
             }
 
         } catch(Exception e) {
@@ -211,7 +211,7 @@ public class MyScanner {
             m_endIdx = info.m_endIdx;
             info.m_token = m_curLine.substring(m_startIdx, m_endIdx);
             info.m_startIdx = m_startIdx;
-            AnalyzeToken(info.m_token, info.m_typeOfDelimiter);
+            AnalyzeToken(info.m_token, info.m_typeOfDelimiter, info);
             info.m_symbolInfo = m_reservedSymbolMap.get(info.m_token);
             info.m_curLine = m_curLine;
             info.m_curLinenum = m_curLinenum;
@@ -651,7 +651,7 @@ public class MyScanner {
         return (ch == ' ' || ch == '\t')? true : false;
     }
 
-    public void AnalyzeToken(String token, int typeOfDelimiter){
+    public void AnalyzeToken(String token, int typeOfDelimiter, InfoOfToken info){
         String infoOfToken = "";
         try {
             if((infoOfToken = m_reservedSymbolMap.get(token)) != null) {
@@ -664,6 +664,7 @@ public class MyScanner {
             }
             else {
                 m_reservedSymbolMap.put(token,"user-defined id");
+                info.firstShowing = true;
                 // System.out.println(token + " : " + m_reservedSymbolMap.get(token));
             }
 
